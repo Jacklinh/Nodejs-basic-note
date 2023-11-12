@@ -70,4 +70,16 @@ git config --global user.email
 ## 🔶 Các lệnh cơ bản của Git
 
 - `git init` : bạn đang tạo ra 1 repository local trên máy tính cá nhân! còn repository tạo trên github là repository đám mây
-- `git add <file>`
+- `git add <file>`: thêm file vào trạng thái để chuẩn bị commit. Khuyên dùng `git add .` để add toàn bộ file đã thay đổi
+- `git commit -m "<mesage>"` : tạo 1 commit với message mô tả thay đổi đã thực hiện
+- `git branch -M main` : chuyển đổi nhánh từ master sang nhánh main
+- `git remote add origin <link https hoặc ssh>` : kết nối repository local của bạn với repository trên Github
+- `git push -u origin main`: Đẩy(push) các thay đổi lên repository từ máy tính lên repository Github theo nhánh main
+- `git pull`: lấy (pull) các thay đổi mới nhất từ repository ở trên Github về máy tính cá nhân
+- `git clone <url của repository>`: sao chép (clone) 1 repositort từ Github về máy tính cá nhân
+- `git status` : hiển thị trạng thái của repository
+- `git log`: hiển thị danh sách các commit đã thực hiện
+- `git branch`: liệt kê các nhánh có trong repository
+- `git branch <branch name>`: tạo 1 nánh mới với tên là `<branch name>`
+- `git checkout <branch name>` : chuyển đổi sang nhánh có tên `<branch name>`
+- `git merge <branch name>` : hợp nhất (merge) các thay đổi từ nhánh `<branch name>` vào nhánh hiện tại
