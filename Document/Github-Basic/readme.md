@@ -65,6 +65,11 @@ git config --global user.email
 - lúc đó Git sẽ sinh ra cho bạn 1 đoạn hướng dẫn "Quick setup", bạn khoan tắt mà hãy copy hoặc để nguyên trình duyệt, để chúng ta sử dụng lệnh cho dự án
 - trên máy tình tạo folder trùng name với name repository, click chuột phải chọn Git base here
 - đánh lệnh `git init`, khi đó sẽ tạo cho bạn 1 folder .git( ở dưới dạng ẩn), để show bạn chọn (view -> option -> view -> chọn show hidden files, folders, and drives)
+- đánh tiếp lệnh `git add .`
+-  `git commit -m "first commit"`
+- `git branch -M main`
+- `git remote add origin <link https hoặc ssh>`
+- `git push -u origin main`
 
 
 ## 🔶 Các lệnh cơ bản của Git

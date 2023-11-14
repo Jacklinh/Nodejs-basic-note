@@ -1,0 +1,1 @@
+- trong môi trường node chạy file ta sử dụng node `node index.js` trên terminal
