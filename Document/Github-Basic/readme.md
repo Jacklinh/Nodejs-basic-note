@@ -31,7 +31,7 @@ search windown "Git" nếu có Git CMD và sau đó nhập lệnh sau vào cửa
 ```bash
 git --version
 hoặc 
-git --v
+git -v
 ```
 Nếu thấy có nội dung: git version 2.42.0.windowns.2 thì git đã cài rồi
 
