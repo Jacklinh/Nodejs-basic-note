@@ -1,0 +1,22 @@
+## POST products
+POST http://localhost:3000/products
+
+Content-Type: application/json
+{
+    "id": 4,
+    "name": "Iphone 12 pro news",
+    "color": "Silver",
+    "category": "Iphone",
+    "price": "15.900.00đ"
+}
+
+### update Products
+PUT http://localhost:3000/products/2
+Content-Type: application/json
+
+{
+    "name": "tablet update"
+}
+
+### delete products
+DELETE http://localhost:3000/products/2
