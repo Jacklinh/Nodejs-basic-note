@@ -1,0 +1,51 @@
+[
+    {
+        "id": 1,
+        "name": "Clothes",
+        "image": "https://i.imgur.com/QkIa5tT.jpeg",
+        "creationAt": "2024-07-30T08:16:05.000Z",
+        "updatedAt": "2024-07-30T08:16:05.000Z"
+      },
+      {
+        "id": 2,
+        "name": "Electronics",
+        "image": "https://i.imgur.com/ZANVnHE.jpeg",
+        "creationAt": "2024-07-30T08:16:05.000Z",
+        "updatedAt": "2024-07-30T08:16:05.000Z"
+      },
+      {
+        "id": 3,
+        "name": "Furniture",
+        "image": "https://i.imgur.com/Qphac99.jpeg",
+        "creationAt": "2024-07-30T08:16:05.000Z",
+        "updatedAt": "2024-07-30T08:16:05.000Z"
+      },
+      {
+        "id": 4,
+        "name": "Shoes",
+        "image": "https://i.imgur.com/qNOjJje.jpeg",
+        "creationAt": "2024-07-30T08:16:05.000Z",
+        "updatedAt": "2024-07-30T08:16:05.000Z"
+      },
+      {
+        "id": 5,
+        "name": "Miscellaneous",
+        "image": "https://i.imgur.com/BG8J0Fj.jpg",
+        "creationAt": "2024-07-30T08:16:05.000Z",
+        "updatedAt": "2024-07-30T08:16:05.000Z"
+      },
+      {
+        "id": 9,
+        "name": "furniture",
+        "image": "http://placeimg.com/640/480",
+        "creationAt": "2024-07-30T09:25:01.000Z",
+        "updatedAt": "2024-07-30T09:25:01.000Z"
+      },
+      {
+        "id": 10,
+        "name": "furniture",
+        "image": "http://placeimg.com/640/480",
+        "creationAt": "2024-07-30T09:30:42.000Z",
+        "updatedAt": "2024-07-30T09:30:42.000Z"
+      }
+]

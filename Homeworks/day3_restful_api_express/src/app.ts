@@ -4,6 +4,8 @@ import createError from 'http-errors';
 import categoriesRoute from './routes/v1/categories.route';
 import brandsRoute from './routes/v1/brands.route';
 import productRoute from './routes/v1/products.route';
+// import các route v2
+import categoriesRouteV2 from './routes/v2/categories.route';
 const app: Express = express();
 
 
@@ -17,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1', categoriesRoute)
 app.use('/api/v1', brandsRoute)
 app.use('/api/v1', productRoute)
+// v2
+app.use('/api/v2/categories', categoriesRouteV2)
+
 // Handle errors( phải nằm sau phần khai báo routers)
 
 // errors 404, not found
