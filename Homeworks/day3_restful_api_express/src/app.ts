@@ -6,6 +6,8 @@ import brandsRoute from './routes/v1/brands.route';
 import productRoute from './routes/v1/products.route';
 // import các route v2
 import categoriesRouteV2 from './routes/v2/categories.route';
+// import helper error 
+import {sendJsonErrors} from './helpers/responseHandler'
 const app: Express = express();
 
 
@@ -34,15 +36,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    const statusCode = err.status || 500;
-    res.status(statusCode).json({ 
-    statusCode: statusCode, 
-    message: err.message 
-    });
+    sendJsonErrors(res,err)
 });
-
-app.get('/',(req: Request, res: Response) => {
-    res.status(200).json({message: 'Express + TypeScript Server'});
-})
 
 export default app

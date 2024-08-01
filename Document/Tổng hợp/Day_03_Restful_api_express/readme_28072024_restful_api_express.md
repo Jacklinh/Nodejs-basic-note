@@ -222,6 +222,27 @@ Tiếp tục cấu hình lại file package.json để chạy server
   },
 ```
 
+trong folder src/constants/ tạo file configs.ts để move các hằng số server vào
+file configs.ts
+```ts
+import dotenv from 'dotenv'
+dotenv.config()
+/**
+ * lấy được các biến môi trường
+ * từ file .env
+ */
+
+export const globalConfig = {
+    NODE_ENV: process.env.NODE_ENV,
+    PORT: process.env.PORT
+}
+```
+khi đó ta edit lại file server.ts để import config vào
+file server.ts
+```ts
+import { globalConfig } from "./src/constants/configs"
+const POST = globalConfig.PORT || 3000;
+```
 lúc này ta chạy cổng server là 8080 (http://localhost:8080/)
 
 ## Tạo ra 1 restful api
@@ -241,3 +262,110 @@ https://localhost:8080/api/v1/categories
 ```
 
 Trả về danh sách Danh mục
+
+- B1: Trong folder src/routes/v1 , tạo file categories.route.ts
+
+cài thêm thư viện `http-errors` để bắt lỗi từ request và hệ thống
+```bash
+yarn add http-errors 
+```
+vào file app.ts để handle errors cho hiển thị dạng kiểu json
+```ts
+import createError from 'http-errors';
+// Handle errors( phải nằm sau phần khai báo routers)
+// errors 404, not found
+app.use((rep: Request, res: Response, next: NextFunction) => {
+    next(createError(404))
+})
+// Báo lỗi ở dạng JSON
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    const statusCode = err.status || 500;
+    res.status(statusCode).json({ 
+    statusCode: statusCode, 
+    message: err.message 
+    });
+});
+```
+lúc này file categories.route.ts 
+```ts
+import express, {Request, Response, NextFunction} from 'express'
+import createError from 'http-errors';
+const router = express.Router();
+
+// dữ liệu đầu vào
+const cates = [
+  {
+    "id": 1,
+    "name": "Clothes",
+    "image": "https://i.imgur.com/QkIa5tT.jpeg",
+    "creationAt": "2024-07-30T08:16:05.000Z",
+    "updatedAt": "2024-07-30T08:16:05.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Electronics",
+    "image": "https://i.imgur.com/ZANVnHE.jpeg",
+    "creationAt": "2024-07-30T08:16:05.000Z",
+    "updatedAt": "2024-07-30T08:16:05.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Furniture",
+    "image": "https://i.imgur.com/Qphac99.jpeg",
+    "creationAt": "2024-07-30T08:16:05.000Z",
+    "updatedAt": "2024-07-30T08:16:05.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Shoes",
+    "image": "https://i.imgur.com/qNOjJje.jpeg",
+    "creationAt": "2024-07-30T08:16:05.000Z",
+    "updatedAt": "2024-07-30T08:16:05.000Z"
+  },
+  {
+    "id": 5,
+    "name": "Miscellaneous",
+    "image": "https://i.imgur.com/BG8J0Fj.jpg",
+    "creationAt": "2024-07-30T08:16:05.000Z",
+    "updatedAt": "2024-07-30T08:16:05.000Z"
+  },
+  {
+    "id": 9,
+    "name": "furniture",
+    "image": "http://placeimg.com/640/480",
+    "creationAt": "2024-07-30T09:25:01.000Z",
+    "updatedAt": "2024-07-30T09:25:01.000Z"
+  },
+  {
+    "id": 10,
+    "name": "furniture",
+    "image": "http://placeimg.com/640/480",
+    "creationAt": "2024-07-30T09:30:42.000Z",
+    "updatedAt": "2024-07-30T09:30:42.000Z"
+  }
+]
+// Get all categories
+//GET localhost:8080/api/v1/categories
+router.get('/categories', (req: Request, res: Response) => {
+  res.status(200).json({
+    data: cates
+  });
+});
+
+export default router;
+```
+
+- B2: chỉnh sửa lại file app.ts để import các route vào
+```ts
+// import các route 
+import categoriesRoute from './routes/v1/categories.route'
+
+// BẮT ĐẦU KHAI BÁO ROUTES TỪ ĐÂY
+app.use('/api/v1', categoriesRoute)
+```
+
+=> như vậy hôm nay chúng ta đã biết cách sử dụng folder routes , .env, server.ts ,constants

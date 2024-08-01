@@ -16,35 +16,35 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
 
 
-app.get('/', (rep: Request, res: Response) => {
+app.get('/', (req: Request, res: Response) => {
 //   res.send('trang chủ')
   res.render('index') //Đang nhắm đến file views/index.html
 })
 // route get khớp với /users/1, /users/2, /users/1323, /users/17854
 // :id chính là route prameter
 // \d+: chứa 1 hoặc nhiều chữ số
-app.get('/users/:id(\\d+)', (rep: Request, res: Response)=>{
+app.get('/users/:id(\\d+)', (req: Request, res: Response)=>{
     // id = rep.params.id
-    const {id} = rep.params;
+    const {id} = req.params;
     res.send('user id is'+ id);
 })
 // route get khớp với /users/tuanhung1234, /users/124thienthan, /users/saytinh
 // [a-zA-Z0-9]+:  chỉ chấp nhận 1 or nhiều chữ cái hoặc chữ số 
-app.get('/users/:username([a-zA-Z0-9]+)', (rep: Request, res: Response)=>{
+app.get('/users/:username([a-zA-Z0-9]+)', (req: Request, res: Response)=>{
     // id = rep.params.id
-    const {username} = rep.params;
+    const {username} = req.params;
     res.send('username page is '+ username);
 })
 // route get khớp với /article/iphone-15-pro-max-gia-re.html , /article/5-cong-thuc-thanh-cong-tu-chuyen-gia.html
 // [a-zA-Z0-9-]+\.html$: chấp nhận 1 hoặc nhiều chữ cái , chữ số và kết thúc .html
-app.get('/article/:slug([a-zA-Z0-9-]+\.html$)', (rep: Request, res: Response)=>{
+app.get('/article/:slug([a-zA-Z0-9-]+\.html$)', (req: Request, res: Response)=>{
     // id = rep.params.id
-    const {slug} = rep.params;
+    const {slug} = req.params;
     res.send('article detail page is '+ slug);
 })
 
 // page html about
-app.get('/about', (rep: Request, res: Response) => {
+app.get('/about', (req: Request, res: Response) => {
     res.render('about') 
 })
 // page html products
@@ -71,7 +71,7 @@ const listProduct = [
         price: '10.900.00đ'
     }
 ] 
-app.get('/products', (rep: Request, res: Response) => {   
+app.get('/products', (req: Request, res: Response) => {   
     // res.status(200).json({
     //     data: listProduct
     // })
@@ -80,8 +80,8 @@ app.get('/products', (rep: Request, res: Response) => {
     }) 
 })
 // page products detail với thông tin id tương ứng
-app.get('/products/:id(\\d+)', (rep: Request, res: Response) => {
-    const {id} = rep.params;  
+app.get('/products/:id(\\d+)', (req: Request, res: Response) => {
+    const {id} = req.params;  
     const product = listProduct.find(p => p.id === parseInt(id));
     if(!product){
         throw Error('product not found')
@@ -92,13 +92,13 @@ app.get('/products/:id(\\d+)', (rep: Request, res: Response) => {
     }) 
 })
 // thêm sản phẩm mới
-app.post('/products', (rep: Request, res: Response) => {
+app.post('/products', (req: Request, res: Response) => {
     res.status(201).json({
-        data: rep.body
+        data: req.body
     })
 })
 // edit products
-app.put('/products/:id(\\d+)', (rep: Request, res: Response) => {
+app.put('/products/:id(\\d+)', (req: Request, res: Response) => {
     try {
         const {id} = rep.params;
         const payload = rep.body;  
@@ -121,9 +121,9 @@ app.put('/products/:id(\\d+)', (rep: Request, res: Response) => {
      
 })
 // xoá product
-app.delete('/products/:id(\\d+)', (rep: Request, res: Response) => {
+app.delete('/products/:id(\\d+)', (req: Request, res: Response) => {
     try {
-        const {id} = rep.params;
+        const {id} = req.params;
         const product = listProduct.find(p => p.id === parseInt(id));
         if(!product){
             throw Error('product not found')
