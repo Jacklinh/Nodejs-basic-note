@@ -3,9 +3,10 @@ import createError from 'http-errors';
 // import các route 
 import categoriesRoute from './routes/v1/categories.route';
 import brandsRoute from './routes/v1/brands.route';
-import productRoute from './routes/v1/products.route';
-// import các route v2
-import categoriesRouteV2 from './routes/v2/categories.route';
+import customersRoute from './routes/v1/customers.route';
+import staffsRoute from './routes/v1/staffs.route';
+import productsRoute from './routes/v1/products.route';
+import ordersRoute from './routes/v1/orders.route';
 // import helper error 
 import {sendJsonErrors} from './helpers/responseHandler'
 const app: Express = express();
@@ -20,9 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 // BẮT ĐẦU KHAI BÁO ROUTErS TỪ ĐÂY
 app.use('/api/v1', categoriesRoute)
 app.use('/api/v1', brandsRoute)
-app.use('/api/v1', productRoute)
-// v2
-app.use('/api/v2/categories', categoriesRouteV2)
+app.use('/api/v1', customersRoute)
+app.use('/api/v1', staffsRoute)
+app.use('/api/v1', productsRoute)
+app.use('/api/v1', ordersRoute)
 
 // Handle errors( phải nằm sau phần khai báo routers)
 
