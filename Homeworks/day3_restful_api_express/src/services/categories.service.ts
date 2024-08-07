@@ -7,14 +7,7 @@ import createError from 'http-errors';
 // const fileName = './src/databases/categories.json';
 // import schema model 
 import Category from '../models/categories.model';
-import {ObjectId} from 'mongoose'
-type typeCategories = {
-    id: ObjectId,
-    name: string,
-    desdescription?: string
-    slug: string
-}
-const findAll = async () => {
+const findAll = async (query: any) => {
     // lúc này sẽ k cần đọc file nữa mà nó trực tiếp liên kết với database trên mongodb
     /* 
     b1: đọc nội dung file, có chứa tiếng viết 
@@ -22,22 +15,37 @@ const findAll = async () => {
     convert qua objet
     const cates: typeCategories[] = JSON.parse(data);
     */
-    const categories = await Category.find();
-    return categories;
+    // lọc theo từng điều kiện
+    let objectFilters:any = {};
+    if(query.keyword && query.keyword != '') { // lọc theo name
+        objectFilters = {...objectFilters, category_name: new RegExp(query.keyword, 'i')};
+    }
+    const categories = await Category.find({...objectFilters,}).select('-__v');
+    return {
+        filters: objectFilters,
+        customers_list: categories
+    };
 }
 const findByID = async (id: string) => {
+    /** backup 07/08/2024
     //Đi tìm 1 cái khớp id
-     /**
-     * SELECT * FROM categories WHERE id = ''
-     */
-    const category = await Category.findById(id);
-    // bắt lỗi khi không tìm thấy
+     SELECT * FROM categories WHERE id = ''
+     
+     //const category = await Category.findById(id);
+     // bắt lỗi khi không tìm thấy
+    //  if(!category) {
+    //      throw createError(400,'categories not found')
+    //  }
+    //  return category;
+    */
+    
+    const category = await Category.findById(id).select('-__v');
     if(!category) {
-        throw createError(400,'categories not found')
+        throw createError(400,'category not found')
     }
     return category;
 }
-const createRecord = async (payload: typeCategories) => {
+const createRecord = async (body: any) => {
     /* backup 3/08/2024
     // đọc file cũ
     const cates = findAll();
@@ -48,11 +56,18 @@ const createRecord = async (payload: typeCategories) => {
         if (err) throw createError(500, 'writeFile error')
     });
     return payload;
-    */
+    // backup 07/08/2024
     const category = await Category.create(payload);
     return category;
+    */
+    const payloads = {
+        category_name: body.category_name,
+        description: body.description,
+    }
+    const category = await Category.create(payloads);
+    return category;
 }
-const updateByID = async (id: string, payload: typeCategories) => {
+const updateByID = async (id: string, payload: any) => {
     /* backup 3/8/2024
     const cates = findAll();
 
@@ -72,11 +87,16 @@ const updateByID = async (id: string, payload: typeCategories) => {
         if (err) throw createError(500, 'writeFile error')
     });
     return newCategory;
-    */
+    // backup 07/08/2024
     const category = await Category.findByIdAndUpdate(id,payload);
     if(!category){
         throw createError(400,"categories not found");
     }
+    return category;
+    */
+    const category = await findByID(id);
+    Object.assign(category,payload)
+    await category.save();
     return category;
 }
 const deleteByID = async (id: string) => {
@@ -94,11 +114,16 @@ const deleteByID = async (id: string) => {
         if (err) throw createError(500, 'writeFile error')
     });
     return newCategory;
-    */
+    // backup 07/08/2024
     const category = await Category.findByIdAndDelete(id);
     if(!category) {
         throw createError(400,"categories not found");
     }
+    return category;
+    */
+    
+    const category = await findByID(id);
+    await category.deleteOne({ _id: category._id })
     return category;
 }
 export default {

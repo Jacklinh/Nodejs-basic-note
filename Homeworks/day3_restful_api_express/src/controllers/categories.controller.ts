@@ -7,7 +7,7 @@ import { sendJsonSuccess } from '../helpers/responseHandler';
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // lấy data từ services
-        const cates = await categoriesService.findAll();
+        const cates = await categoriesService.findAll(req.query);
         // trả lại cho client
         // res.status(200).json({
         //     data: cates

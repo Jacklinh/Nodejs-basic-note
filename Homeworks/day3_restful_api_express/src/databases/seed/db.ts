@@ -18,7 +18,6 @@ mongoose.connect(globalConfig.MONGODB_URL as string)
 .catch((err) => {
     console.log('failded to connect to mongodb error');
 })
-
 // tạo nhiều document 
 const categories = [
     {
@@ -300,185 +299,6 @@ const staffs = [
     "active": false
   }
 ]
-const products = [
-  {
-    "product_name": "Road Bike",
-    "slug": "road-bike",
-    "price": 500,
-    "discount": 0,
-    "description": "Road bike for paved roads",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Mountain Bike",
-    "slug": "mountain-bike",
-    "price": 600,
-    "discount": 0,
-    "description": "Off-road and trail bike",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Hybrid Bike",
-    "slug": "hybrid-bike",
-    "price": 450,
-    "discount": 0,
-    "description": "Versatile bike for various terrains",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Cruiser Bike",
-    "slug": "cruiser-bike",
-    "price": 400,
-    "discount": 0,
-    "description": "Comfortable and stylish bike for leisurely rides",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Electric Bike",
-    "slug": "electric-bike",
-    "price": 800,
-    "discount": 0,
-    "description": "Electric bike powered by electric motor",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Road Bike Pro",
-    "slug": "road-bike-pro",
-    "price": 1200,
-    "discount": 100,
-    "description": "Professional road bike for paved roads",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Mountain Bike Pro",
-    "slug": "mountain-bike-pro",
-    "price": 1500,
-    "discount": 120,
-    "description": "Professional off-road and trail bike",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Hybrid Bike Pro",
-    "slug": "hybrid-bike-pro",
-    "price": 1000,
-    "discount": 80,
-    "description": "Professional versatile bike for various terrains",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Cruiser Bike Pro",
-    "slug": "cruiser-bike-pro",
-    "price": 900,
-    "discount": 70,
-    "description": "Professional comfortable and stylish bike",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Electric Bike Pro",
-    "slug": "electric-bike-pro",
-    "price": 1800,
-    "discount": 150,
-    "description": "Professional electric bike powered by electric motor",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Road Bike XL",
-    "slug": "road-bike-xl",
-    "price": 700,
-    "discount": 0,
-    "description": "Extra large road bike for paved roads",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Mountain Bike XL",
-    "slug": "mountain-bike-xl",
-    "price": 800,
-    "discount": 0,
-    "description": "Extra large off-road and trail bike",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Hybrid Bike XL",
-    "slug": "hybrid-bike-xl",
-    "price": 600,
-    "discount": 0,
-    "description": "Extra large versatile bike for various terrains",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Cruiser Bike XL",
-    "slug": "cruiser-bike-xl",
-    "price": 550,
-    "discount": 0,
-    "description": "Extra large comfortable and stylish bike",
-    "model_year": 2022
-  },
-  {
-    "product_name": "Electric Bike XL",
-    "slug": "electric-bike-xl",
-    "price": 1000,
-    "discount": 0,
-    "description": "Extra large electric bike powered by electric motor",
-    "model_year": 2022
-  }
-]
-const orders = [
-  {
-    "order_status": 2,
-    "order_date": "2023-06-15T12:34:56.789Z",
-    "require_date": "2023-06-20T00:00:00.000Z",
-    "shipping_date": "2023-06-18T00:00:00.000Z",
-    "order_note": "Giao hàng cẩn thận",
-    "street": "123 Đường Abc",
-    "city": "Hà Nội",
-    "state": "Hà Nội",
-    "payment_type": 2
-  },
-  {
-    "order_status": 1,
-    "order_date": "2023-07-20T09:12:34.567Z",
-    "require_date": null,
-    "shipping_date": null,
-    "order_note": "Giao hàng trước 5pm",
-    "street": "456 Đường Xyz",
-    "city": "Hồ Chí Minh",
-    "state": "Hồ Chí Minh",
-    "payment_type": 1
-  },
-  {
-    "order_status": 3,
-    "order_date": "2023-08-01T15:45:23.901Z",
-    "require_date": "2023-08-05T00:00:00.000Z",
-    "shipping_date": null,
-    "order_note": "Giao hàng vào cuối tuần",
-    "street": "789 Đường Pqr",
-    "city": "Đà Nẵng",
-    "state": "Đà Nẵng",
-    "payment_type": 3
-  },
-  {
-    "order_status": 4,
-    "order_date": "2023-07-10T18:22:44.678Z",
-    "require_date": "2023-07-15T00:00:00.000Z",
-    "shipping_date": "2023-07-12T00:00:00.000Z",
-    "order_note": "Giao hàng cẩn thận, không để vỡ",
-    "street": "987 Đường Stu",
-    "city": "Cần Thơ",
-    "state": "Cần Thơ",
-    "payment_type": 4
-  },
-  {
-    "order_status": 2,
-    "order_date": "2023-09-01T11:00:00.000Z",
-    "require_date": "2023-09-05T00:00:00.000Z",
-    "shipping_date": "2023-09-03T00:00:00.000Z",
-    "order_note": "Giao hàng trước 3pm",
-    "street": "654 Đường Vwx",
-    "city": "Đà Lạt",
-    "state": "Lâm Đồng",
-    "payment_type": 2
-  }
-];
 const runDB = async ()=>{
     // // tạo mới 1 document
     // const category = new Category({
@@ -489,11 +309,281 @@ const runDB = async ()=>{
     // // đến bước này nó mới lưu vào database có sẵn trên mongodb
     // await category.save();
     // tạo nhiều document 
-    await Category.insertMany(categories);
-    await Brand.insertMany(brands);
-    await Customer.insertMany(customers);
-    await Staff.insertMany(staffs);
-    await Product.insertMany(products);
+    const savedCategories = await Category.insertMany(categories);
+    const randomIdCategory = await savedCategories[Math.floor(Math.random() * savedCategories.length)];
+    const savedBrands = await Brand.insertMany(brands);
+    const randomIdBrand = await savedBrands[Math.floor(Math.random() * savedBrands.length)];
+    const savedCustomers =  await Customer.insertMany(customers);
+    const randomIdCustomer = await savedCustomers[Math.floor(Math.random() * savedCustomers.length)];
+    const savedStaffs = await Staff.insertMany(staffs);
+    const randomIdStaff = await savedStaffs[Math.floor(Math.random() * savedStaffs.length)]
+    const products = [
+      {
+        "product_name": "Road Bike",
+        "price": 500,
+        "discount": 0,
+        "description": "Road bike for paved roads",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false,
+      },
+      {
+        "product_name": "Mountain Bike",
+        "price": 600,
+        "discount": 0,
+        "description": "Off-road and trail bike",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Hybrid Bike",
+        "price": 450,
+        "discount": 0,
+        "description": "Versatile bike for various terrains",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Cruiser Bike",
+        "price": 400,
+        "discount": 0,
+        "description": "Comfortable and stylish bike for leisurely rides",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Electric Bike",
+        "price": 800,
+        "discount": 0,
+        "description": "Electric bike powered by electric motor",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Road Bike Pro",
+        "price": 1200,
+        "discount": 50,
+        "description": "Professional road bike for paved roads",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Mountain Bike Pro",
+        "price": 1500,
+        "discount": 50,
+        "description": "Professional off-road and trail bike",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Hybrid Bike Pro",
+        "price": 1000,
+        "discount": 50,
+        "description": "Professional versatile bike for various terrains",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Cruiser Bike Pro",
+        "price": 900,
+        "discount": 70,
+        "description": "Professional comfortable and stylish bike",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Electric Bike Pro",
+        "price": 1800,
+        "discount": 50,
+        "description": "Professional electric bike powered by electric motor",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id
+      },
+      {
+        "product_name": "Road Bike XL",
+        "price": 700,
+        "discount": 0,
+        "description": "Extra large road bike for paved roads",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Mountain Bike XL",
+        "price": 800,
+        "discount": 0,
+        "description": "Extra large off-road and trail bike",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Hybrid Bike XL",
+        "price": 600,
+        "discount": 0,
+        "description": "Extra large versatile bike for various terrains",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Cruiser Bike XL",
+        "price": 550,
+        "discount": 0,
+        "description": "Extra large comfortable and stylish bike",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      },
+      {
+        "product_name": "Electric Bike XL",
+        "price": 1000,
+        "discount": 0,
+        "description": "Extra large electric bike powered by electric motor",
+        "model_year": 2022,
+        "category": randomIdCategory._id,
+        "brand": randomIdBrand._id,
+        "isBest": false,
+        "isNewProduct": false,
+        "isShowHome": false,
+        "isDelete": false
+      }
+    ]
+    const savedProducts = await Product.insertMany(products);
+    const randomIdProduct = await savedProducts[Math.floor(Math.random() * savedProducts.length)]
+    const orders = [
+      {
+        "customer": randomIdCustomer._id,
+        "staff": randomIdStaff._id,
+        "order_item": randomIdProduct._id,
+        "order_status": 2,
+        "order_date": "2023-06-15T12:34:56.789Z",
+        "require_date": "2023-06-20T00:00:00.000Z",
+        "shipping_date": "2023-06-18T00:00:00.000Z",
+        "order_note": "Giao hàng cẩn thận",
+        "street": "123 Đường Abc",
+        "city": "Hà Nội",
+        "state": "Hà Nội",
+        "payment_type": 2,
+      },
+      {
+        "customer": randomIdCustomer._id,
+        "staff": randomIdStaff._id,
+        "order_item": randomIdProduct._id,
+        "order_status": 1,
+        "order_date": "2023-07-20T09:12:34.567Z",
+        "require_date": null,
+        "shipping_date": null,
+        "order_note": "Giao hàng trước 5pm",
+        "street": "456 Đường Xyz",
+        "city": "Hồ Chí Minh",
+        "state": "Hồ Chí Minh",
+        "payment_type": 1
+      },
+      {
+        "customer": randomIdCustomer._id,
+        "staff": randomIdStaff._id,
+        "order_item": randomIdProduct._id,
+        "order_status": 3,
+        "order_date": "2023-08-01T15:45:23.901Z",
+        "require_date": "2023-08-05T00:00:00.000Z",
+        "shipping_date": null,
+        "order_note": "Giao hàng vào cuối tuần",
+        "street": "789 Đường Pqr",
+        "city": "Đà Nẵng",
+        "state": "Đà Nẵng",
+        "payment_type": 3
+      },
+      {
+        "customer": randomIdCustomer._id,
+        "staff": randomIdStaff._id,
+        "order_item": randomIdProduct._id,
+        "order_status": 4,
+        "order_date": "2023-07-10T18:22:44.678Z",
+        "require_date": "2023-07-15T00:00:00.000Z",
+        "shipping_date": "2023-07-12T00:00:00.000Z",
+        "order_note": "Giao hàng cẩn thận, không để vỡ",
+        "street": "987 Đường Stu",
+        "city": "Cần Thơ",
+        "state": "Cần Thơ",
+        "payment_type": 4
+      },
+      {
+        "customer": randomIdCustomer._id,
+        "staff": randomIdStaff._id,
+        "order_item": randomIdProduct._id,
+        "order_status": 2,
+        "order_date": "2023-09-01T11:00:00.000Z",
+        "require_date": "2023-09-05T00:00:00.000Z",
+        "shipping_date": "2023-09-03T00:00:00.000Z",
+        "order_note": "Giao hàng trước 3pm",
+        "street": "654 Đường Vwx",
+        "city": "Đà Lạt",
+        "state": "Lâm Đồng",
+        "payment_type": 2
+      }
+    ];
     await Order.insertMany(orders);
 }
 

@@ -19,12 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // BẮT ĐẦU KHAI BÁO ROUTErS TỪ ĐÂY
-app.use('/api/v1', categoriesRoute)
-app.use('/api/v1', brandsRoute)
-app.use('/api/v1', customersRoute)
-app.use('/api/v1', staffsRoute)
-app.use('/api/v1', productsRoute)
-app.use('/api/v1', ordersRoute)
+app.use('/api/v1/categories', categoriesRoute)
+app.use('/api/v1/brands', brandsRoute)
+app.use('/api/v1/customers', customersRoute)
+app.use('/api/v1/staffs', staffsRoute)
+app.use('/api/v1/products', productsRoute)
+app.use('/api/v1/orders', ordersRoute)
 
 // Handle errors( phải nằm sau phần khai báo routers)
 

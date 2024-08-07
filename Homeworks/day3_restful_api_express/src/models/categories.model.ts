@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
-
+import createError from 'http-errors';
+import { buildSlug } from "../helpers/buildSlug";
 // khởi tạo 1 schema
 // doc <https://mongoosejs.com/docs/schematypes.html>
 const categorySchema = new Schema({
@@ -23,15 +24,21 @@ const categorySchema = new Schema({
     slug: {
         type: String,
         maxLength: 50,
-        unique: true,
-        trim: true
+        trim: true,
+        require: false
     }
 },{ 
     // khai báo timestamps để khi quản lý dữ liệu khi thay đổi , nó sẽ tự động sinh ra 2 biến createdAt(thời gian tạo request) và updatedAt(thời gian update request)
     timestamps: true 
     // collection: 'categories' ở đây trên database sẽ tạo name database theo tên mình đặt
 })
-
+categorySchema.pre('validate', async function(next){
+    if(!this.category_name){
+        throw createError(400,"category name not fould")
+    }
+    this.slug = buildSlug(this.category_name);
+    next();
+})
 // Export một Model, doc <https://mongoosejs.com/docs/models.html>, name Xxx = new model()
 // Ở đây ta đặt tên theo name số ít 
 const Category = model("Category", categorySchema);

@@ -1,46 +1,44 @@
 
 import createError from 'http-errors';
 import Customer from '../models/customers.model';
-import {ObjectId} from 'mongoose'
-type typeCustomers = {
-    id: ObjectId,
-    first_name: string,
-    last_name: string,
-    phone: string,
-    email: string,
-    street: string,
-    city: string,
-    state: string,
-    zip_code: string,
-    password?: string
-}
-const findAll = async () => {
-    const customers = await Customer.find();
-    return customers;
+const findAll = async (query: any) => {
+    // lọc theo từng điều kiện
+    let objectFilters:any = {};
+    if(query.keyword && query.keyword != '') { // lọc theo name
+        objectFilters = {...objectFilters, first_name: new RegExp(query.keyword, 'i'), email: new RegExp(query.keyword, 'i')};
+    }
+    const customers = await Customer.find({...objectFilters,}).select('-__v');
+    return {
+        filters: objectFilters,
+        customers_list: customers
+    };
 }
 const findByID = async (id: string) => {
-    const customer = await Customer.findById(id);
+    const customer = await Customer.findById(id).select('-__v');
     if(!customer) {
-        throw createError(400,'customers not found')
+        throw createError(400,'customer not found')
     }
     return customer;
 }
-const createRecord = async (payload: typeCustomers) => {
-    const customer = await Customer.create(payload);
+const createRecord = async (body: any) => {
+    const payloads = {
+        first_name: body.first_name,
+        last_name: body.last_name,
+        phone: body.phone,
+        email: body.email,
+    }
+    const customer = await Customer.create(payloads);
     return customer;
 }
-const updateByID = async (id: string, payload: typeCustomers) => {
-    const customer = await Customer.findByIdAndUpdate(id,payload);
-    if(!customer){
-        throw createError(400,"customers not found");
-    }
+const updateByID = async (id: string, payload: any) => {
+    const customer = await findByID(id);
+    Object.assign(customer,payload)
+    await customer.save();
     return customer;
 }
 const deleteByID = async (id: string) => {
-    const customer = await Customer.findByIdAndDelete(id);
-    if(!customer) {
-        throw createError(400,"customers not found");
-    }
+    const customer = await findByID(id);
+    await customer.deleteOne({ _id: customer._id })
     return customer;
 }
 export default {

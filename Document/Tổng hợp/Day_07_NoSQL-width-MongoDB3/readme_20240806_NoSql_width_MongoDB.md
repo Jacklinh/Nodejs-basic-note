@@ -1,3 +1,46 @@
+# NoSQL width MongoDB- thực hiện query
+
+## tạo slug tự động theo name 
+- cài đặt `slugify` <https://www.npmjs.com/package/slugify>
+```bash
+npm i slugify 
+or yarn add slugify
+```
+- trong folder src/helpers/buildSlug.ts để tạo hàm dùng chung slug cho toàn dự án
+```ts
+import slugify from "slugify";
+export const buildSlug = (str: string) => {
+    return slugify(str,{
+        replacement: '-',  // replace spaces with replacement character, defaults to `-`
+        remove: undefined, // remove characters that match regex, defaults to `undefined`
+        lower: false,      // convert to lower case, defaults to `false`
+        strict: false,     // strip special characters except replacement, defaults to `false`
+        locale: 'vi',      // language code of the locale to use
+        trim: true         // trim leading and trailing replacement chars, defaults to `true`
+    })
+}
+```
+- trong folder src/models/xxx.models.ts 
+sử hook middleware để Can thiệp vào dữ liệu trước khi ghi vào database
+```ts
+//middleware
+// Can thiệp vào dữ liệu trước khi ghi vào database
+productschema.pre('validate', async function(next){ // ở đây có thể sử dụng save cho validate, nhưng bên db.ts mình đang sử dụng insertMany nên phải dùng validate để ưu tiên gọi trước bất kỳ xử lý nào. còn save chỉ lưu 1 lần.
+  /* tự động tạo slug từ product_name */
+  if(!this.product_name) {
+    throw createError(400,"product name not found");
+  }
+  this.slug = buildSlug(this.product_name);
+  next();
+})
+```
+## common types
+trong src/types/models.ts chứa các type chung
+
+## làm việc với services 
+- chỉnh sửa file src/services/xxx.service.ts
+
+```ts
 
 import createError from 'http-errors';
 import Product from '../models/products.model';
@@ -119,3 +162,69 @@ export default {
     updateByID,
     deleteByID
 }
+```
+
+## làm việc với controller
+
+- chỉnh sửa file src/controller/xxx.service.ts
+```ts
+import {Request, Response, NextFunction} from 'express'
+import productsService from '../services/products.service';
+import { sendJsonSuccess } from '../helpers/responseHandler';
+
+const findAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        /* backup 06/08/20224 
+          const cates = await productsService.findAll();
+        */
+        const cates = await productsService.findAll(req.query);
+        sendJsonSuccess(res,"success")(cates);
+    }catch(error) {
+        next(error)
+    }
+}
+const findById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {id} = req.params;
+      const product = await productsService.findByID(id)
+      sendJsonSuccess(res,"success")(product);
+    }catch(error) {
+      next(error)
+    }
+}
+const createRecord = async (req: Request, res: Response, next: NextFunction)=>{
+    try {
+        const product = await productsService.createRecord(req.body)
+        sendJsonSuccess(res,"success")(product);
+    }catch(error) {
+        next(error)
+    }
+    
+}
+const updateByID = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {id} = req.params;
+      const payload = req.body;
+      const newProduct = await productsService.updateByID(id,payload);
+      sendJsonSuccess(res,"success")(newProduct);
+    }catch(error) {
+      next(error)
+    }
+}
+const deleteByID =async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {id} = req.params;
+      const product =await productsService.deleteByID(id)
+      sendJsonSuccess(res,"success")(product);
+    }catch(error) {
+      next(error)
+    }
+}
+export default {
+    findAll,
+    findById,
+    createRecord,
+    updateByID,
+    deleteByID
+}
+```

@@ -4,7 +4,7 @@ import { sendJsonSuccess } from '../helpers/responseHandler';
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const cates = await customersService.findAll();
+        const cates = await customersService.findAll(req.query);
         sendJsonSuccess(res,"success")(cates);
     }catch(error) {
         next(error)

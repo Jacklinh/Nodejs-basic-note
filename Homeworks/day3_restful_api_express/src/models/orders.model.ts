@@ -24,11 +24,11 @@ const orderItemsSchema = new Schema({
     }
 })
 const orderschema = new Schema({
-    customer_id: {
+    customer: {
         type: Schema.Types.ObjectId,
         ref: 'Customer',
       },
-      staff_id: {
+      staff: {
         type: Schema.Types.ObjectId, //_id
         ref: 'Staff',
       },
