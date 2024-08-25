@@ -193,3 +193,9 @@ app.listen(PORT, () => {
 ```
 Chạy lệnh `yarn dev` để xem kết quả
 
+## Hoàn thiện tạo các entities mssql
+
+- tạo entities <https://typeorm.io/entities>
+
+
+

@@ -1,0 +1,13 @@
+###
+
+POST http://localhost:8000/api/v1/staffs
+Content-Type: application/json
+
+{
+  "first_name": "Admin",
+  "last_name": "Rin",
+  "phone": "0234567899",
+  "email": "rinshop@gmail.com",
+  "active": true,
+  "password": "Rinadmin@2024"
+}
