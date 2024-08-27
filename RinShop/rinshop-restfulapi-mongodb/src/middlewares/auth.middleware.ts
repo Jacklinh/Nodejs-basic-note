@@ -18,6 +18,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         return next(createError(401, 'Unauthorized'));
     }
     try {
+        // giải mã token 
         const decoded = jwt.verify(token, globalConfig.JWT_SECRET_KEY as string) as decodedJWT;
         //try verify staff exits in database
         const staff = await Staff.findById(decoded._id);

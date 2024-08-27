@@ -6,9 +6,7 @@ import staffsRoute  from './routes/v1/staffs.route'
 import authRoute from './routes/v1/auth.route'
 import cors from 'cors'
 const app: Express = express();
-app.use(cors({
-    origin: 'http://localhost:8000/', // Chỉ cho phép truy cập từ nguồn này
-}))
+app.use(cors())
 /* Bắt được dữ liệu từ body của request */
 app.use(express.json())
 //Mã hóa url

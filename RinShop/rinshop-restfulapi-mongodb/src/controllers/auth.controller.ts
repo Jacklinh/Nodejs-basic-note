@@ -14,15 +14,11 @@ const login = async (req: Request, res: Response, next: NextFunction)=>{
   }
 }
 
-interface AuthRequest extends Request {
-  locals: {
-    _id: string
-  }
-}
 
-const profile = async (req: AuthRequest, res: Response, next: NextFunction)=>{
+const profile = async (req: Request, res: Response, next: NextFunction)=>{
   try {
     const {_id} = res.locals.staff;
+    console.log(`req.staff`,res.locals.staff);
 
     const result = await authService.getProfile(_id)
     sendJsonSuccess(res)(result);
@@ -32,7 +28,25 @@ const profile = async (req: AuthRequest, res: Response, next: NextFunction)=>{
   }
 }
 
+
+
+const refreshToken = async (req: Request, res: Response, next: NextFunction)=>{
+  try {
+    const staff = res.locals.staff;
+    console.log(`req.staff`,res.locals.staff);
+
+    const tokens = await authService.getTokens(staff)
+
+    //tạo cặp token mới
+    sendJsonSuccess(res)(tokens);
+
+  } catch (error) {
+    next(error)
+  }
+}
+
 export default {
   login,
-  profile
+  profile,
+  refreshToken
 }

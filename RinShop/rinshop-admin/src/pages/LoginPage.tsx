@@ -1,38 +1,62 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, Flex } from 'antd';
+import { Button, Checkbox, Form, Input, Flex, type FormProps } from 'antd';
+import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 // import images
 import logo from '../assets/logo.png'
 import '../App.css'
+type FieldType = {
+    email: string;
+    password: string;
+    remember?: string;
+};
 const LoginPage = () => {
-    const [form] = Form.useForm();
-    const [clientReady, setClientReady] = useState<boolean>(false);
-    // To disable submit button at the beginning.
+    const { login, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+    //Neu da login roi, thi tra lại dashboard
     useEffect(() => {
-        setClientReady(true);
-    }, []);
-    const onFinish = (values: string) => {
-        console.log('Received values of form: ', values);
+        if (isAuthenticated) {
+        navigate("/");
+        }
+    }, [navigate, isAuthenticated]);
+
+    // To disable submit button at the beginning.
+    const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+        //login api
+        const result = await login(values.email, values.password);
+        //Chuyen trang neu login thanh cong
+        if (result && result.isAuthenticated) {
+        navigate("/");
+        }
     };
+    const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+        errorInfo
+      ) => {
+        console.log("Failed:", errorInfo);
+      };
     return (
         <div className='sec_login'>
             <div className='box_login'>
                 <p className="login_logo"><img className='responsive_image' src={logo} width={270} height={115} alt="rinshop" /></p>
                 <p className="login_desc">Login to dashboard</p>
                 <Form
-                    name="login"
+                    name="basic"
                     initialValues={{ remember: true }}
                     style={{ maxWidth: 360 }}
                     onFinish={onFinish}
-                    form={form}
+                    onFinishFailed={onFinishFailed}
+                    autoComplete="off"
                     >
                     <Form.Item
-                        name="username"
+                        label="Email"
+                        name="email"
                         rules={[{ required: true, message: 'Please input your Username!' }]}
                     >
                         <Input prefix={<UserOutlined />} placeholder="Username" />
                     </Form.Item>
                     <Form.Item
+                        label="Password"
                         name="password"
                         rules={[{ required: true, message: 'Please input your Password!' }]}
                     >
@@ -52,11 +76,6 @@ const LoginPage = () => {
                             <Button 
                                 block type="primary"
                                 htmlType="submit"
-                                disabled={
-                                    !clientReady ||
-                                    !form.isFieldsTouched(true) ||
-                                    !!form.getFieldsError().filter(({ errors }) => errors.length).length
-                                }
                             >
                                 Login
                             </Button>

@@ -609,9 +609,9 @@ Content-Type: application/json
 
 - B15: tạo middlewares để xử lý login (yêu cầu bài toán, khi vào page dashboard thì phải đăng nhập thành công với email và password đã đăng ký)
 
-    - trong folder src/middlewares tạo file `auth.middleware.ts`
+    - trong folder src/middlewares tạo các file 
     cài thêm `yarn add jsonwebtoken`
-
+    file  `auth.middleware.ts` 
     ```ts
     import jwt, { JwtPayload }  from 'jsonwebtoken';
     import Staff from '../models/staffs.model';
@@ -633,8 +633,8 @@ Content-Type: application/json
             return next(createError(401, 'Unauthorized'));
         }
         try {
+            // giải mã token 
             const decoded = jwt.verify(token, globalConfig.JWT_SECRET_KEY as string) as decodedJWT;
-            // trong đó JWT_SECRET_KEY=catFly200miles khai báo ở .env
             //try verify staff exits in database
             const staff = await Staff.findById(decoded._id);
             if (!staff) {
@@ -650,83 +650,99 @@ Content-Type: application/json
         }
     };
     ```
-    - tạo file auth.service.ts
-    ```ts
-    import jwt from 'jsonwebtoken';
-    import bcrypt from "bcrypt";
-    import createError from 'http-errors';
-    import { globalConfig } from '../constants/configs';
-    import Staff from '../models/staffs.model';
 
-    const login = async(email: string, password: string)=>{
-        //b1. Check xem tồn tại staff có email này không
-        const staff = await Staff.findOne({
-        email: email
-        })
-    
-        if(!staff){
-        throw createError(400, "Invalid email or password")
-        }
-        //b2. Nếu tồn tại thì đi so sánh mật khẩu xem khớp ko
-        const passwordHash = staff.password;
-        const isValid = await bcrypt.compareSync(password, passwordHash); // true
-        if(!isValid){
-        //Đừng thông báo: Sai mật mật khẩu. Hãy thông báo chung chung
-        throw createError(400, "Invalid email or password")
-        }
-    
-        console.log('<<=== 🚀 Login thành công ===>>');
-        //3. Tạo token
-        const access_token = jwt.sign(
-            {
-            _id: staff?._id,
-            email: staff.email
-            },
-            globalConfig.JWT_SECRET_KEY as string,
-            {
-            expiresIn: '30d', //Xác định thời gian hết hạn của token
-            //algorithm: 'RS256' //thuật toán mã hóa
-            }
-        );
-    
-        //Fresh Token hết hạn lâu hơn
-        const fresh_token = jwt.sign(
-        {
-            _id: staff?._id,
-            email: staff.email,
-            //role: staff.role,  //phân quyền
+    file `validateSchema.middleware.ts`
+    ```ts
+    import Joi from 'joi';
+    import _ from 'lodash';
+    import{ NextFunction, Request, Response } from 'express';
+
+    const validateSchema = (schema: object) => (req: Request, res: Response, next: NextFunction) => {
+    const pickSchema = _.pick(schema, ['params', 'body', 'query']);
+    const object = _.pick(req, Object.keys(pickSchema));
+    const { value, error } = Joi.compile(pickSchema)
+        .prefs({
+        errors: {
+            label: 'key',
         },
-        globalConfig.JWT_SECRET_KEY as string,
-        {
-            expiresIn: '30d', //Xác định thời gian hết hạn của token
-            //algorithm: 'RS256' //thuật toán mã hóa
-        }
+
+        abortEarly: false,
+        })
+        .validate(object);
+    if (error) {
+        const errorMessage = error.details
+        .map((detail: any) => detail.message)
+        .join(', ');
+        return res.status(400).json({
+        status: 400,
+        message: errorMessage,
+        typeError: 'validateSchema'
+        });
+
+    }
+    Object.assign(req, value);
+    return next();
+    };
+    export default validateSchema
+    ```
+
+    file `validateSchemaYup.middleware.ts`
+    ```ts
+    import * as yup from 'yup';
+    import { NextFunction, Request, Response } from 'express';
+
+    const validateSchemaYup = (schema: any) => async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await schema.validate({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+        }, 
+        { 
+        abortEarly: false, // abortEarly: false để lấy tất cả lỗi thay vì chỉ lấy lỗi đầu tiên
+        }  
     );
-        //4.Trả về token về cho client
-        return {
-        access_token,
-        fresh_token,
-        
+
+        return next();
+    } catch (err) {
+        //console.log(err);
+        if (err instanceof yup.ValidationError) {
+        //console.error(err);
+        return res.status(400).json({
+            statusCode: 400,
+            message: err.errors, // err.errors chứa tất cả các thông điệp lỗi
+            typeError: 'validateSchema'
+        });
         }
+        return res.status(400).json({
+        statusCode: 400,
+        message: 'validate Yup Error',
+        typeError: 'validateSchemaUnknown'
+        });
     }
-    const getProfile = async(id: string)=>{
-        // SELECT * FROM staff WHERE id = id
-        const staff = await Staff.
-        findOne({
-        _id: id
-        }).
-        select('-password -__v');
-        if(!staff){
-        throw createError(400, 'Staff Not Found')
-        }
-        return staff
-    }
+    };
+
+    export default validateSchemaYup;
+    ```
+    - trong folder src/validations/ tao file `authYup.validation.ts`
+    ```ts
+    import * as yup from 'yup';
+
+    const loginSchema = yup
+    .object({
+        body: yup.object({
+        email: yup.string().email().required(),
+        password: yup.string().min(6).required(),
+        }),
+    })
+    .required();
+
+
     export default {
-        getProfile,
-        login
+        loginSchema
     }
     ```
-    - tạo file `auth.controller.ts
+    - src/controllers/auth.controller.ts
     ```ts
     import {Request, Response, NextFunction} from 'express'
     import authService from '../services/auth.service'
@@ -744,16 +760,11 @@ Content-Type: application/json
     }
     }
 
-    interface AuthRequest extends Request {
-    locals: {
-        _id: string
-    }
-    }
 
-    const profile = async (req: AuthRequest, res: Response, next: NextFunction)=>{
+    const profile = async (req: Request, res: Response, next: NextFunction)=>{
     try {
         const {_id} = res.locals.staff;
-        console.log(`res.locals`,res.locals);
+        console.log(`req.staff`,res.locals.staff);
 
         const result = await authService.getProfile(_id)
         sendJsonSuccess(res)(result);
@@ -763,27 +774,193 @@ Content-Type: application/json
     }
     }
 
+
+
+    const refreshToken = async (req: Request, res: Response, next: NextFunction)=>{
+    try {
+        const staff = res.locals.staff;
+        console.log(`req.staff`,res.locals.staff);
+
+        const tokens = await authService.getTokens(staff)
+
+        //tạo cặp token mới
+        sendJsonSuccess(res)(tokens);
+
+    } catch (error) {
+        next(error)
+    }
+    }
+
     export default {
     login,
-    profile
+    profile,
+    refreshToken
     }
     ```
-
-    - tạo file auth.route.ts
+    - src/router/v1 tạo file `author.route.ts`
     ```ts
     import express from 'express';
+    import validateSchemaYup from '../../middlewares/validateSchemaYup.middleware';
+    import authYupValidation from '../../validations/authYup.validation';
     import authController from '../../controllers/auth.controller';
+    import { authenticateToken } from '../../middlewares/auth.middleware';
 
     const router = express.Router()
 
     //POST v1/auth/login
-    router.post('/login', authController.login)
+    router.post('/login', validateSchemaYup(authYupValidation.loginSchema), authController.login)
+
+    router.get('/profile', authenticateToken, authController.profile)
 
     export default router
+
     ```
-    - file app.ts thêm
+
+    - src/services/auth.service.ts
     ```ts
+    import jwt from 'jsonwebtoken';
+    import bcrypt from "bcrypt";
+    import createError from 'http-errors';
+    import { globalConfig } from '../constants/configs';
+    import Staff from '../models/staffs.model';
+    import { ObjectId } from 'mongoose';
+
+    const login = async(email: string, password: string)=>{
+        //b1. Check xem tồn tại staff có email này không
+        const staff = await Staff.findOne({
+        email: email
+        })
+
+        if(!staff){
+            throw createError(400, "Invalid email or password")
+        }
+        //b2. Nếu tồn tại thì đi so sánh mật khẩu xem khớp không
+        const passwordHash = staff.password;
+        const isValid = await bcrypt.compareSync(password, passwordHash); // true
+        if(!isValid){
+            //Đừng thông báo: Sai mật mật khẩu. Hãy thông báo chung chung
+            throw createError(400, "Invalid email or password")
+        }
+        //3. Tạo token
+        const access_token = jwt.sign(
+            {
+                _id: staff?._id,
+                email: staff.email
+            },
+            globalConfig.JWT_SECRET_KEY as string,
+            {
+                expiresIn: '1d', //Xác định thời gian hết hạn của token
+                //algorithm: 'RS256' //thuật toán mã hóa
+            }
+        );
+
+        //reFresh Token hết hạn lâu hơn
+        const refresh_token = jwt.sign(
+            {
+            _id: staff?._id,
+            email: staff.email,
+            //role: staff.role,  //phân quyền
+            },
+            globalConfig.JWT_SECRET_KEY as string,
+            {
+            expiresIn: '1d', //Xác định thời gian hết hạn của token
+            //algorithm: 'RS256' //thuật toán mã hóa
+            }
+        );
+        //4. Trả về token về cho client
+        return {
+        access_token,
+        refresh_token,
+        }
+    }
+
+    const getProfile = async(id: string)=>{
+        // SELECT * FROM staff WHERE id = id
+        const staff = await Staff.
+        findOne({
+        _id: id
+        }).
+        select('-password -__v');
+        if(!staff){
+        throw createError(400, 'Staff Not Found')
+        }
+        return staff
+    }
+    /**
+    * hàm để sinh ra 1 cặp tokken
+    * @param staff 
+    * @returns 
+    */
+    const getTokens = async (staff: {_id: ObjectId, email: string})=>{
+    const access_token = jwt.sign(
+        {
+        _id: staff._id,
+        email: staff.email
+        },
+        globalConfig.JWT_SECRET_KEY as string,
+        {
+        expiresIn: '1d', //Xác định thời gian hết hạn của token
+        //algorithm: 'RS256' //thuật toán mã hóa
+        }
+    );
+
+    //Fresh Token hết hạn lâu hơn
+    const refresh_token = jwt.sign(
+    {
+        _id: staff?._id,
+        email: staff.email,
+        //role: staff.role,  //phân quyền
+    },
+    globalConfig.JWT_SECRET_KEY as string,
+    {
+        expiresIn: '1d', //Xác định thời gian hết hạn của token
+        //algorithm: 'RS256' //thuật toán mã hóa
+    }
+    )
+    return {access_token, refresh_token}
+    }
+    export default {
+        getProfile,
+        login,
+        getTokens
+    }
+    ```
+    - lúc này file app.ts ta edit thêm 
+    ```ts
+    import express, {Express, Request, Response, NextFunction} from 'express';
+    import createError from 'http-errors';
+    import { sendJsonErrors } from './helpers/responseHandler';
+    /* import các routes */
+    import staffsRoute  from './routes/v1/staffs.route'
     import authRoute from './routes/v1/auth.route'
+    import cors from 'cors'
+    const app: Express = express();
+    app.use(cors())
+    /* Bắt được dữ liệu từ body của request */
+    app.use(express.json())
+    //Mã hóa url
+    app.use(express.urlencoded({ extended: true }));
+
+
+    // BẮT ĐẦU KHAI BÁO ROUTES ở trên app.use handle error
+    app.use('/api/v1/staffs', staffsRoute)
     app.use('/api/v1/auth', authRoute)
+    // errors 404, not found
+    app.use((rep: Request, res: Response, next: NextFunction) => {
+        next(createError(404))
+    })
+    // Báo lỗi ở dạng JSON
+    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+        // set locals, only providing error in development
+        res.locals.message = err.message;
+        res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+        sendJsonErrors(res,err)
+    });
+
+    export default app
     ```
     - cài thêm `yarn add cros`(Cross-Origin Resource Sharing) để giao tiếp với cơ sở dữ liệu MongoDB 
+    
+
+    ==> lúc nảy cơ bản ta đã tạo xong auth để chuẩn bị cho việc login ở page login cho dashboard .

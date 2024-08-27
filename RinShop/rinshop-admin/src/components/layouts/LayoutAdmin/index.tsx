@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useNavigate } from "react-router-dom";
+import useAuth from "../../../hooks/useAuth";
 import {
   AppstoreOutlined,
   UserOutlined 
@@ -37,6 +39,16 @@ const items: MenuProps['items'] = [
    }
 ];
 const LayoutAdmin = () => {
+    const navigate = useNavigate();
+
+    const { isAuthenticated } = useAuth();
+
+    //check login
+    useEffect(() => {
+        if (!isAuthenticated) {
+        navigate("/login");
+        }
+    }, [navigate, isAuthenticated]);
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
