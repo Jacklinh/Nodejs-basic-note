@@ -1,5 +1,6 @@
 import axios from "axios";
-const API_URL = 'http://localhost:8000/api/v1/auth';
+import { globalSetting } from "../constants/configs";
+const API_URL = `${globalSetting.URL_API}/v1/auth`;
 
 const axiosClient = axios.create({
   baseURL: API_URL,

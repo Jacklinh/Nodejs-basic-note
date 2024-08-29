@@ -7,6 +7,7 @@ body {
     --main-background: #f3f4f6;
     --main-color: #009f7f;
     --body-color: #222222;
+    --bg-gray: #F3F4F6;
 }
 #root,
 #root *,
@@ -18,36 +19,6 @@ body {
     max-width: 100%;
     height: auto;
 }
-/* page login */
-.sec_login {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--main-background);
-    min-height: 100vh;
-}
-.box_login {
-    margin: 0 auto;
-    padding: 2em;
-    width: 22em;
-    background-color: #ffffff;
-    color: var(--body-color);
-    border: 2px solid #dfdfdf;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-.login_desc {
-    text-align: center;
-}
-.box_login input {
-    min-height: 40px;
-}
-.box_login button {
-    min-height: 40px;
-    margin-bottom: 10px;
-    background-color: var(--main-color);
-    font-weight: bold;
-}
-.box_login a {
-    color: var(--main-color);
+p {
+    margin: 0;
 }
