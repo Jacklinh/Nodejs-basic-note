@@ -17,6 +17,8 @@
 }
 .login_desc {
     text-align: center;
+    margin-bottom: 20px;
+    font-size: 112.5%;
 }
 .box_login input {
     min-height: 40px;
@@ -29,4 +31,7 @@
 }
 .box_login a {
     color: var(--main-color);
+}
+.box_login label {
+    font-weight: bold;
 }

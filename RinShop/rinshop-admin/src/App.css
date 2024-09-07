@@ -8,6 +8,7 @@ body {
     --main-color: #009f7f;
     --body-color: #222222;
     --bg-gray: #F3F4F6;
+    --bg-white: #ffffff;
 }
 #root,
 #root *,
@@ -21,4 +22,51 @@ body {
 }
 p {
     margin: 0;
+}
+/* modal add */
+.box_modal .ant-btn-primary {
+    background-color: var(--main-color);
+}
+.box_modal input{
+    min-height: 30px;
+}
+/* form_search */
+.form_search input {
+    min-height: 40px;
+    min-width: 300px;
+}
+.form_search button {
+    min-height: 40px;
+}
+.form_search button[type="submit"] {
+    background-color: var(--main-color);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+.form_search button[type="submit"]:disabled {
+    opacity: 0.5;
+}
+.form_search button[type="reset"] {
+    font-weight: 500;
+    text-transform: uppercase;
+} 
+/* button style */
+.common_button {
+    background-color: var(--main-color);
+}
+/* box_heading */
+.box_heading{
+    display: flex;
+    justify-content: space-between;
+    gap: 0 20px;
+    align-items: center;
+    background-color: var(--bg-white);
+    color: var(--body-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+.box_heading .ant-select-selector {
+    min-height: 40px;
+    min-width: 300px;
 }

@@ -36,8 +36,8 @@ const LoginAPI = () => {
 	return (
 		<div className={styles.sec_login}>
             <div className={styles.box_login}>
-                <p className="login_logo"><img className='responsive_image' src={logo} width={270} height={115} alt="rinshop" /></p>
-                <p className="login_desc">Login to dashboard</p>
+                <p className={styles.login_logo}><img className='responsive_image' src={logo} width={270} height={115} alt="rinshop" /></p>
+                <p className={styles.login_desc}>Login to dashboard</p>
                 <Form
                     name="form_login_api"
                     layout="vertical"
@@ -59,7 +59,7 @@ const LoginAPI = () => {
                         name="password"
                         rules={[{ required: true, message: 'Please input your Password!' }]}
                     >
-                        <Input prefix={<LockOutlined />} type="password" placeholder="Password" />
+                        <Input.Password prefix={<LockOutlined />} type="password" placeholder="Password" />
                     </Form.Item>
                     <Form.Item>
                         <Flex justify="space-between" align="center">

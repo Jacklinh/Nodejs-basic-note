@@ -7,34 +7,49 @@ const findAll = async (query: any) => {
     const page_str = query.page;
     const limit_str = query.limit;
     const page = page_str ? parseInt(page_str as string): 1;
-    const limit = limit_str ? parseInt(limit_str as string): 10;
+    const limit = limit_str ? parseInt(limit_str as string): 3;
     const offset = (page - 1) * limit;
-    //Đếm tổng số record hiện có của collection
-    const totalRecords = await Staff.countDocuments();
+    
     /* end phan trang */
     /* Sắp xếp */
     let objSort: any = {};
     const sortBy = query.sort || 'updateAt'; // Mặc định sắp xếp theo ngày tạo giảm dần
     const idBy = query._id && query._id == 'ASC' ? 1: -1;
-    const nameBy = query.last_name && query.last_name == 'ASC' ? 1: -1;
+    const nameBy = query.last_name && query.last_name == 'ASC' ? -1: 1;
     objSort = {...objSort, [sortBy]: idBy,nameBy} // Thêm phần tử sắp xếp động vào object {}
-    /* Select * FROM product */
+    /* search theo tên */
+    let objectFilter: any = {};
+    if(query.keyword && query.keyword !== '') {
+        const regex = new RegExp(query.keyword, 'i');
+        objectFilter = {...objectFilter,$or: [
+            { first_name: {$regex: regex} },
+            { last_name: {$regex: regex} },
+            { email: {$regex: regex} }
+        ]}
+    }
+    /* Select * FROM staffs */
     const staffs = await Staff
-    .find()
+    .find({
+        ...objectFilter
+    })
     .sort(objSort)
-    .select('-__v -_id -password')
+    .select('-__v -password')
     .skip(offset)
-    .limit(limit)
-    ;
-
+    .limit(limit);
+    //Đếm tổng số record hiện có của collection
+    const totalRecords = await Staff.countDocuments({
+        ...objectFilter
+    });
     return {
         staffs_list: staffs,
+        sorts: objSort,
+        filters: staffs,
         // Phân trang
         pagination: {
-        page,
-        limit,
-        totalPages: Math.ceil(totalRecords / limit), //tổng số trang
-        totalRecords
+            page,
+            limit,
+            totalPages: Math.ceil(totalRecords / limit), //tổng số trang
+            totalRecords
         }
     }
 }

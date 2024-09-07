@@ -5,13 +5,14 @@ import {
   AppstoreOutlined,
   ShopOutlined
 } from '@ant-design/icons';
+import { TbUsersGroup,TbCategory  } from "react-icons/tb"
 import type { MenuProps } from 'antd';
-import { Layout, Menu, theme, Flex } from 'antd';
+import { Layout, Menu} from 'antd';
 // import images
 import logo from '../../../assets/logo.png'
-import UserInfo from '../../UserInfo';
-
-const { Header, Content, Footer, Sider } = Layout;
+import HeaderAdmin from './HeaderAdmin';
+import styles from './LayoutAdmin.module.css'
+const { Content, Footer, Sider } = Layout;
 const siderStyle: React.CSSProperties = {
   overflow: 'auto',
   height: '100vh',
@@ -26,7 +27,7 @@ const siderStyle: React.CSSProperties = {
 
 const items: MenuProps['items'] = [
    {    
-        label: "Main",
+        label: "MAIN",
         type: "group",
         children: [
             {
@@ -38,16 +39,33 @@ const items: MenuProps['items'] = [
        
    },
    {    
-    label: "Product management",
+    label: "PRODUCT MANAGEMENT",
     type: "group",
     children: [
         {
             key: "products",
             icon: <ShopOutlined />,
             label: "Products"
+        },
+        {
+            key: "categories",
+            icon: <TbCategory />,
+            label: "Categories"
         }
       ],
    
+    },
+    {    
+        label: "STAFFS CONTROL",
+        type: "group",
+        children: [
+            {
+                key: "staffs",
+                icon: <TbUsersGroup />,
+                label: "All Users"
+            }
+        ],
+        
     }
 ];
 const LayoutAdmin = () => {
@@ -61,13 +79,10 @@ const LayoutAdmin = () => {
         navigate("/login");
         }
     }, [navigate, isAuthenticated]);
-    const {
-        token: { colorBgContainer },
-    } = theme.useToken();
     return (
         <div>
             <Layout hasSider style={{ minHeight: "100vh" }}>
-                <Sider style={siderStyle}>
+                <Sider style={siderStyle} className={styles.box_siderbar}>
                     <div className="demo-logo-vertical">
                         <p><img className='responsive_image' src={logo} width={200} height={81} alt="rinshop" /></p>
                     </div>
@@ -77,31 +92,11 @@ const LayoutAdmin = () => {
                         items={items} 
                         onClick={({ key }) => {
                         navigate("/" + key.split("-").join("/"));
-                        console.log(key);
                     }} 
                     />
                 </Sider>
                 <Layout style={{ marginInlineStart: 200 }}>
-                    <Header
-                        style={{
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 1,
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: colorBgContainer,
-                        }}
-                    >   
-                        <Flex style={{ width: '100%', justifyContent: 'space-between' }}>
-                            <p>search & avatar</p>
-                            <Flex>
-                                <UserInfo />
-                            </Flex>
-                            
-                        </Flex>
-                        
-                    </Header>
+                    <HeaderAdmin />
                     <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
                         <Outlet />
                     </Content>

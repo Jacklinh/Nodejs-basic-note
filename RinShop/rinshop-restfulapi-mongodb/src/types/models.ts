@@ -10,3 +10,10 @@ export type TypeStaff = {
     active?: boolean,
     role?: string;
 }
+
+export type TypeCategory = {
+    _id?: ObjectId,
+    category_name: string,
+    description?: string,
+    slug?: string
+}

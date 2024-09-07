@@ -4,13 +4,13 @@ import { sendJsonSuccess } from '../helpers/responseHandler';
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const cates = await staffsService.findAll(req.query);
-        sendJsonSuccess(res,"success")(cates);
+        const staff = await staffsService.findAll(req.query);
+        sendJsonSuccess(res,"success")(staff);
     }catch(error) {
         next(error)
     }
 }
-const findById = async (req: Request, res: Response, next: NextFunction) => {
+const findByID = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {id} = req.params;
       const staff = await staffsService.findByID(id)
@@ -49,7 +49,7 @@ const deleteByID =async (req: Request, res: Response, next: NextFunction) => {
 }
 export default {
     findAll,
-    findById,
+    findByID,
     createRecord,
     updateByID,
     deleteByID
