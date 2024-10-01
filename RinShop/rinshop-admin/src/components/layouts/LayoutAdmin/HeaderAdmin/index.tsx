@@ -6,7 +6,6 @@ const HeaderAdmin = () => {
     return (
         <>
         <Header className={styles.sec_header} >   
-            <p>search</p>
             <UserInfo />
         </Header>
         </>

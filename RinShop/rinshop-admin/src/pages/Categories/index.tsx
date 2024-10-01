@@ -69,7 +69,7 @@ const Categories = () => {
         mutationFn: fetchCreateCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['category',page]
+                queryKey: ['categories',page]
             })
             message.success('add category success');
             setIsModalAddOpen(false)
@@ -83,7 +83,7 @@ const Categories = () => {
         setIsModalAddOpen(true);
     }
     const handleOkAdd = () => {
-        formUpdate.submit();
+        formAdd.submit();
     }
     const handleCancelAdd = () => {
         setIsModalAddOpen(false);
@@ -185,8 +185,8 @@ const Categories = () => {
                       }}
                     ></Button>
                     <Popconfirm
-                        title="Delete staff"
-                        description="Are you sure to delete this staff?"
+                        title="Delete category"
+                        description="Are you sure to delete this category?"
                         onConfirm={()=> {
                             // gọi xử lý xoá bằng cách mutate ánh xạ
                             deleteCategory.mutate(record._id)
@@ -209,7 +209,7 @@ const Categories = () => {
     return (
         <>
             <div className="box_heading">
-                <h2>Category</h2>
+                <h2>DANH MỤC SẢN PHẨM</h2>
                 <Select
                     showSearch
                     placeholder="Select a category name"
@@ -222,38 +222,42 @@ const Categories = () => {
                     },
                     ...(filterCategory?.data
                         ? filterCategory.data.categories_list.map((c:categoryDataType) => ({
-                            key: c._id,
                             value: c.category_name,
                             label: c.category_name,
                           }))
                         : []),
                     ]}
                 />
-                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>{showModalAdd()}} className='common_button'>Add Category</Button>
+                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>{showModalAdd()}} className='common_button'>Thêm danh mục</Button>
             </div>
-            <Table columns={categoryColumns} dataSource={getCategory?.data?.categories_list || [] } pagination={false } />
+            <Table
+            columns={categoryColumns} 
+            dataSource={getCategory?.data?.categories_list || [] } 
+            rowKey={(record) => record._id}
+            pagination={false } />
             <Pagination 
-            defaultCurrent={1} 
-            pageSize={getCategory?.data?.pagination.limit}
-            total={getCategory?.data?.pagination.totalRecords || 0}
-            onChange={(page) => {
-                // thay đổi url
-                if(page !== 1) {
-                    navigate(`/categories?page=${page}`)
-                }else {
-                    navigate(`/categories`)
-                }
-            }} 
+                className='pagination_page'
+                defaultCurrent={1} 
+                pageSize={getCategory?.data?.pagination.limit || 5}
+                total={getCategory?.data?.pagination.totalRecords || 0}
+                onChange={(page) => {
+                    // thay đổi url
+                    if(page !== 1) {
+                        navigate(`/categories?page=${page}`)
+                    }else {
+                        navigate(`/categories`)
+                    }
+                }} 
 		    />;
             {/* modal edit */}
-                <Modal
-                title="UPDATE CATEGORY"
+            <Modal
+                title="CẬP NHẬT DANH MỤC"
                 open={isModalEditOpen}
                 onOk={handleOkEdit}
                 onCancel={handleCancelEdit}
                 className='box_modal'
-                okText="Update"
-                cancelText="Cancel"
+                okText="Cập nhật"
+                cancelText="Huỷ"
                 >
                 <Form
                 name="formEditCategory"
@@ -273,17 +277,17 @@ const Categories = () => {
                 <Input type="hidden" />
                 </Form.Item>
                 <Form.Item<categoryDataType>
-                label="Category Name"
+                label="Tên Danh Mục"
                 name="category_name"
                 hasFeedback
                 rules={[
-                    {required: true, message: "Please input your first name!" },
+                    {required: true, message: "Vui lòng nhập tên danh mục!" },
                     ]}
                 >
                 <Input />
                 </Form.Item>
                 <Form.Item<categoryDataType>
-                label="Description"
+                label="Chi tiết danh mục"
                 name="description"
                 hasFeedback
                 >
@@ -293,13 +297,13 @@ const Categories = () => {
             </Modal>
             {/* modal add  */}
             <Modal
-            title="ADD CATEGORY"
+            title="THÊM DANH MỤC"
             open={isModalAddOpen}
             onOk={handleOkAdd}
             onCancel={handleCancelAdd}
             className='box_modal'
-            okText="Create"
-            cancelText="Cancel"
+            okText="Thêm mới"
+            cancelText="Huỷ"
             >
             <Form
             name="formAddCategory"
@@ -312,17 +316,17 @@ const Categories = () => {
             form={formAdd}
         >
             <Form.Item<categoryDataType>
-            label="Category Name"
+            label="Tên Danh Mục"
             name="category_name"
             hasFeedback
             rules={[
-                {required: true, message: "Please input your first name!" },
+                {required: true, message: "Vui lòng nhập tên danh mục!" },
                 ]}
             >
             <Input />
             </Form.Item>
             <Form.Item<categoryDataType>
-            label="Description"
+            label="Chi tiết danh mục"
             name="description"
             hasFeedback
             >

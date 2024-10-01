@@ -1,17 +1,17 @@
 import { useEffect } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, Flex, type FormProps } from 'antd';
+import { Button, Form, Input} from 'antd';
+import {type FormProps } from 'antd';
 import { useNavigate } from "react-router-dom";
 
 import useAuth from '../../hooks/useAuth';
 // import images
-import logo from '../../assets/logo.png'
+import logo from '../../assets/logo5.png'
 import styles from './LoginAPI.module.css'
 import '../../App.css'
 type FieldType = {
 	email: string;
 	password: string;
-	remember?: string;
 };
 const LoginAPI = () => {
 	const { login, isAuthenticated } = useAuth();
@@ -36,13 +36,11 @@ const LoginAPI = () => {
 	return (
 		<div className={styles.sec_login}>
             <div className={styles.box_login}>
-                <p className={styles.login_logo}><img className='responsive_image' src={logo} width={270} height={115} alt="rinshop" /></p>
-                <p className={styles.login_desc}>Login to dashboard</p>
+                <p className={styles.login_logo}><img className='responsive_image' src={logo} width={220} height={220} alt="" /></p>
+                <p className={styles.login_desc}><i>Đăng nhập vào dashboard</i></p>
                 <Form
                     name="form_login_api"
                     layout="vertical"
-                    initialValues={{ remember: true }}
-                    style={{ maxWidth: 360 }}
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
                     autoComplete="off"
@@ -50,39 +48,27 @@ const LoginAPI = () => {
                     <Form.Item
                         label="Email"
                         name="email"
-                        rules={[{ required: true, message: 'Please input your Email!' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập Email!' }]}
                     >
-                        <Input prefix={<UserOutlined />} placeholder="Username" />
+                        <Input prefix={<UserOutlined />} placeholder="email" />
                     </Form.Item>
                     <Form.Item
                         label="Password"
                         name="password"
-                        rules={[{ required: true, message: 'Please input your Password!' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
                     >
-                        <Input.Password prefix={<LockOutlined />} type="password" placeholder="Password" />
+                        <Input.Password prefix={<LockOutlined />} type="password" placeholder="password" />
                     </Form.Item>
-                    <Form.Item>
-                        <Flex justify="space-between" align="center">
-                        <Form.Item name="remember" valuePropName="checked" noStyle>
-                            <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
-                        <a href="">Forgot password</a>
-                        </Flex>
-                    </Form.Item>
-
                     <Form.Item shouldUpdate>
                         {() => (
                             <Button 
                                 block type="primary"
                                 htmlType="submit"
                             >
-                                Login
+                                Đăng nhập
                             </Button>
                         )}
                         
-                    </Form.Item>
-                    <Form.Item>
-                        or <a href="">Register now!</a>
                     </Form.Item>
                 </Form>
             </div>

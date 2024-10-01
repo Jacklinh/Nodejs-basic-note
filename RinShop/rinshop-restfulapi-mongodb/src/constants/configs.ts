@@ -10,4 +10,5 @@ export const globalConfig = {
     PORT: process.env.PORT || 3000,
     MONGODB_URL: process.env.MONGODB_URL,
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
+    UPLOAD_DIRECTORY: process.env.UPLOAD_DIRECTORY,
 }

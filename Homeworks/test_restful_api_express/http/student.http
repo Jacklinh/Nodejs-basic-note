@@ -1,0 +1,21 @@
+# GET All
+GET http://localhost:8080/api/v1/students
+
+###
+
+# Get by id
+GET http://localhost:8080/api/v1/students/66f567e3563926bd7c25dc64
+
+### 
+
+# create a student 
+POST http://localhost:8080/api/v1/students
+Content-Type: application/json
+
+{
+    "fullName": "Nguyen xuan dan",
+    "age": 20,
+    "email": "vanlinhadd@gmail.com",
+    "mobile": "0342682179",
+    "class": "batch39"
+}

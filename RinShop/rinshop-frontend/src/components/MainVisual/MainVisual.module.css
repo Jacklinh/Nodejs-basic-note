@@ -1,0 +1,34 @@
+.mainvs_item {
+    position: relative;
+}
+.mainvs_cnt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    color: var(--color_white);
+    text-align: center;
+}
+.mainvs_inner {
+    opacity: 0; 
+    transform: translateY(100px); 
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+.mainvs_inner h2,
+.mainvs_inner p {
+    opacity: 0; 
+    transform: translateY(100px); 
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+.mainvs_inner.active,
+.mainvs_inner.active h2,
+.mainvs_inner.active p {
+    opacity: 1; 
+    transform: translateY(0); 
+}
+.mainvs_inner.active h2 {
+    transition-delay: 0.2s;
+}
+.mainvs_inner.active p {
+    transition-delay: 0.5s;
+}

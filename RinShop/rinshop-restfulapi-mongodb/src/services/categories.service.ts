@@ -35,7 +35,7 @@ const findAll= async(query: any)=>{
         }
     }
 }
-const findByID = async (id: string) => {
+const findByID = async(id: string) => {
     const category = await Category.findById(id).select('-__v');
     if(!category){
         throw createError(400,"category not found");
@@ -46,13 +46,13 @@ const createRecord = async(payload: TypeCategory) => {
     const category = await Category.create(payload);
     return category;
 }
-const updateByID = async (id: string, payload: TypeCategory) => {
+const updateByID = async(id: string, payload: TypeCategory) => {
     const category = await findByID(id);
     Object.assign(category,payload);
     await category.save();
     return category;
 }
-const deleteByID = async (id: string) => {
+const deleteByID = async(id: string) => {
     const category = await findByID(id);
     await category.deleteOne({_id: category._id});
     return category;

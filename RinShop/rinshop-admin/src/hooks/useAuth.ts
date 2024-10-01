@@ -5,9 +5,9 @@ import { createJSONStorage } from "zustand/middleware"; // Import createJSONStor
 import { globalSetting } from "../constants/configs";
 interface User {
   _id: string;
-  first_name: string;
-  last_name: string;
-  full_name: string;
+  fullName: string;
+  phone: string;
+  password: string;
   email: string,
   role: string;
 }
@@ -33,7 +33,12 @@ const useAuth = create<AuthState>()(
           try {
             const response = await axiosClient.post(
               `${globalSetting.URL_API}/auth/login`,
-              { email, password }
+              { email, password },
+              {
+                headers: {
+                  'Content-Type': 'application/json',  // Đảm bảo gửi đúng kiểu dữ liệu
+                }
+              }
             );
 
             if (response && response.data.statusCode === 200) {
@@ -53,7 +58,17 @@ const useAuth = create<AuthState>()(
                 error: "Username or password is invalid",
               };
             }
-          } catch {
+          } catch(error: unknown) {
+            if (typeof error === 'object' && error !== null && 'response' in error) {
+              const err = error as { response: { status: number } };
+              if (err.response.status === 400) {
+                alert('Email hoặc mật khẩu không đúng');
+              } else {
+                alert('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+              }
+            } else {
+              alert('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+            }
             return {
               isAuthenticated: false,
               error: "Login failed",

@@ -70,3 +70,32 @@ p {
     min-height: 40px;
     min-width: 300px;
 }
+/* form_edit */
+.form_edit .form_edit_item {
+    display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 30px;
+    width: 100%;
+}
+.form_edit_item .form_edit_ttl {
+    width: 40%;
+}
+.form_edit_item .form_edit_content {
+    flex: 1;
+    background-color: #ffffff;
+    color: #222222;
+    padding: 20px;
+    border-radius: 10px;
+}
+/* pagination_page */
+.pagination_page {
+    margin-top: 30px;
+}
+/* sec_footer */
+.sec_footer {
+    font-size: 112.5%;
+    background-color: #ffffff;
+    color: #222222;
+    padding: 15px;
+    text-align: center;
+}

@@ -34,5 +34,20 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         return next(createError(403, 'Forbidden-authenticateToken'));
     }
 };
+// kiểm tra quyền truy cập dựa vào role
+export const authorizationAccess = (roles: string[] = []) => {
+    if(typeof roles === 'string'){
+        roles = [roles]
+    }
+    return (req: Request, res: Response, next: NextFunction) => {
+        const staffRole = res.locals.staff.role;
+        // kiêm tra nếu nhân viên k có quyền truy cập
+        if(roles.length && staffRole && !roles.includes(staffRole)) {
+            return next(createError(403,'Bạn không có quyền truy cập vào chức năng này'));
+        }
+        // nếu quyền hợp lê thì cho phép truy cập
+        next()
+    }
+}
   
   

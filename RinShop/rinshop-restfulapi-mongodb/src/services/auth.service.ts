@@ -8,7 +8,7 @@ import { ObjectId } from 'mongoose';
 const login = async(email: string, password: string)=>{
 	//b1. Check xem tồn tại staff có email này không
 	const staff = await Staff.findOne({
-	email: email
+		email: email
 	})
 
 	if(!staff){
@@ -16,7 +16,7 @@ const login = async(email: string, password: string)=>{
 	}
 	//b2. Nếu tồn tại thì đi so sánh mật khẩu xem khớp không
 	const passwordHash = staff.password;
-	const isValid = await bcrypt.compareSync(password, passwordHash); // true
+	const isValid = password === passwordHash; // true
 	if(!isValid){
 		//Đừng thông báo: Sai mật mật khẩu. Hãy thông báo chung chung
 		throw createError(400, "Invalid email or password")

@@ -5,11 +5,11 @@ import {
   AppstoreOutlined,
   ShopOutlined
 } from '@ant-design/icons';
-import { TbUsersGroup,TbCategory  } from "react-icons/tb"
+import { TbUsersGroup,TbCategory } from "react-icons/tb"
 import type { MenuProps } from 'antd';
 import { Layout, Menu} from 'antd';
 // import images
-import logo from '../../../assets/logo.png'
+import logo from '../../../assets/logo5.png'
 import HeaderAdmin from './HeaderAdmin';
 import styles from './LayoutAdmin.module.css'
 const { Content, Footer, Sider } = Layout;
@@ -39,30 +39,30 @@ const items: MenuProps['items'] = [
        
    },
    {    
-    label: "PRODUCT MANAGEMENT",
+label: "QUẢN LÝ SẢN PHẨM",
     type: "group",
     children: [
         {
             key: "products",
             icon: <ShopOutlined />,
-            label: "Products"
+            label: "SẢN PHẨM"
         },
         {
             key: "categories",
             icon: <TbCategory />,
-            label: "Categories"
+            label: "DANH MỤC"
         }
       ],
    
     },
     {    
-        label: "STAFFS CONTROL",
+        label: "NGƯỜI DÙNG",
         type: "group",
         children: [
             {
                 key: "staffs",
                 icon: <TbUsersGroup />,
-                label: "All Users"
+                label: "NHÂN VIÊN"
             }
         ],
         
@@ -84,7 +84,7 @@ const LayoutAdmin = () => {
             <Layout hasSider style={{ minHeight: "100vh" }}>
                 <Sider style={siderStyle} className={styles.box_siderbar}>
                     <div className="demo-logo-vertical">
-                        <p><img className='responsive_image' src={logo} width={200} height={81} alt="rinshop" /></p>
+                        <p><img className='responsive_image' src={logo} width={220} height={220} alt="rinshop" /></p>
                     </div>
                     <Menu 
                         theme="light" 
@@ -97,11 +97,11 @@ const LayoutAdmin = () => {
                 </Sider>
                 <Layout style={{ marginInlineStart: 200 }}>
                     <HeaderAdmin />
-                    <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
+                    <Content style={{ margin: '24px 16px', overflow: 'initial' }}>
                         <Outlet />
                     </Content>
-                    <Footer style={{ textAlign: 'center' }}>
-                    Ant Design ©{new Date().getFullYear()} Created by Ant UED
+                    <Footer className='sec_footer'>
+                        Rin vegetables - fruits ©{new Date().getFullYear()} Created by Le Van Linh
                     </Footer>
                 </Layout>
             </Layout>

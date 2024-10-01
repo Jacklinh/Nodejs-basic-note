@@ -8,7 +8,9 @@ import NoPage from "./pages/NoPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import './App.css'
-import ProductPage from "./pages/ProductPage";
+import ProductPage from "./pages/Products";
+import EditProduct from "./pages/Products/EditProduct";
+import AddProduct from "./pages/Products/AddProduct";
 import Staffs from "./pages/Staffs";
 import Categories from "./pages/Categories";
 const queryClient = new QueryClient();
@@ -23,6 +25,8 @@ function App() {
                 <Route path="/" element={<LayoutAdmin />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="products" element={<ProductPage />} />
+                    <Route path="products/:id" element={<EditProduct />} />
+                    <Route path="products/add" element={<AddProduct />} />
                     <Route path="categories" element={<Categories />} />
                     <Route path="staffs" element={<Staffs />} />
                 </Route>

@@ -10,11 +10,11 @@ const UserInfo = () => {
             <div className={styles.user_info_item}>
                 <p className={styles.user_avatar}>
                     <Avatar>
-                        {user?.last_name}     
+                        {user?.role}     
                     </Avatar>
                 </p>
                 <p className={styles.user_info}>
-                    <span className={styles.user_name}>{user?.first_name} {user?.last_name}</span>
+                    <span className={styles.user_name}>{user?.fullName}</span>
                     <span className={styles.user_email}>{user?.email}</span>
                 </p>
             </div>
@@ -30,11 +30,11 @@ const UserInfo = () => {
                         <div role="button" tabIndex={0}  className={styles.user_info_item}>
                             <p className={styles.user_avatar}>
                                 <Avatar>
-                                    {user.last_name}     
+                                    {user.role}     
                                 </Avatar>
                             </p>
                             <p className={styles.user_info}>
-                                <span className={styles.user_name}>{user.first_name} {user.last_name}</span>
+                                <span className={styles.user_name}>{user.fullName}</span>
                             </p>
                         </div>
                     </Popover>

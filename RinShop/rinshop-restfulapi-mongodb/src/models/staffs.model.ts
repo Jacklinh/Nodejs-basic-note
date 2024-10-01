@@ -1,15 +1,12 @@
 import { Schema, model } from "mongoose";
-import { TypeStaff } from "../types/models";
+import { TypeStaff,EnumRole } from "../types/models";
 const staffSchema = new Schema<TypeStaff>({
-    first_name: {
+    fullName: {
         type: String,
         required: true,
-        maxlength: 50
-    },
-    last_name: {
-        type: String,
-        required: true,
-        maxlength: 50
+        maxlength: 100,
+        trim: true,
+        minlength: 5
     },
     phone: {
         type: String,
@@ -23,26 +20,31 @@ const staffSchema = new Schema<TypeStaff>({
         unique: true,
         match: /.+\@.+\..+/,
     },
-    /* Khóa tài khoản  */
-    active: {
-        type: Boolean,
-        default: true,
-        require: false
-    },
     password: {
         type: String,
         maxlength: 255,
         require: false,
         default: null,
-        min: 8
-    }
+        minlength: 8
+    },
+    role: {
+        type: String,
+        enum: [EnumRole.Admin, EnumRole.SubAdmin, EnumRole.User, EnumRole.Viewer],
+        default: EnumRole.Viewer
+    },
+    /* status  */
+    active: {
+        type: Boolean,
+        default: true,
+        require: false
+    },
 },{ 
     timestamps: true 
 })
 // tạo 1 thuộc tính ảo fullname
-staffSchema.virtual('fullName').get(function () {
-    return this.first_name + ' ' + this.last_name;
-});
+// staffSchema.virtual('fullName').get(function () {
+//     return this.first_name + ' ' + this.last_name;
+// });
 // tăng tính bảo mật cho password dùng bcrypt
 // staffSchema.pre('save', async function (next) {
 //     const staff = this;
