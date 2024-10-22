@@ -7,7 +7,6 @@ const router = express.Router();
 router.post('/photo', (req, res, next)=>{
 uploadImage(req, res, function (err) {
       if (err instanceof multer.MulterError) {
-        console.log(err);
         res.status(500).json({
           statusCode: 500,
           message: err.message,

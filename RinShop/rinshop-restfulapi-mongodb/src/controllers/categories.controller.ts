@@ -1,7 +1,8 @@
 import {Request, Response, NextFunction} from 'express';
 import categoriesService from '../services/categories.service';
 import { sendJsonSuccess } from '../helpers/responseHandler';
-
+import { uploadImage } from '../helpers/multerUpload';
+import multer from 'multer';
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const category = await categoriesService.findAll(req.query);

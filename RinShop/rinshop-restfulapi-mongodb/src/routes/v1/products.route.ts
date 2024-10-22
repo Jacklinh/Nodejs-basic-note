@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/slug/:slug',productsController.findAllCategoryBySlug)
 router.get('/details/:slug',productsController.findOneBySlug)
 // check token để các route là private
-// router.use(authenticateToken)
+router.use(authenticateToken)
 // 1 get all products
 //GET localhost:8000/api/v1/products
 router.get('',productsController.findAll)

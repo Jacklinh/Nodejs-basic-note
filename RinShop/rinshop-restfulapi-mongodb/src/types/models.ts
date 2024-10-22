@@ -14,7 +14,7 @@ export type TypeCategory = {
     _id?: ObjectId,
     category_name: string,
     description?: string,
-    slug?: string
+    slug?: string,
 }
 
 export type TypeProduct = {

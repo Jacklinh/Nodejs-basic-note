@@ -4,10 +4,10 @@ export type TypeCategory = {
     _id?: string,
     category_name: string,
     description?: string,
-    slug?: string
+    slug?: string,
 }
 export type TypeProduct = {
-    _id?: string,
+    _id: string,
     product_name: string,
     price: number,
     discount: number,// Giảm giá cho sản phẩm (nếu có), có thể là tỷ lệ phần trăm hoặc số tiền.
@@ -16,6 +16,7 @@ export type TypeProduct = {
     origin?: string, // nơi xuất xứ sản phẩm
     slug?: string,
     thumbnail?: string, // images sản phẩm
+    gallery?: string[],
     stock?: number, //Số lượng sản phẩm có trong kho
     isActive: boolean, // trạng thái hoạt động của sản phẩm
     isBest: boolean, /* SP bán nổi bật */

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import {Table,Pagination,Input,Button,Space,message, Popconfirm, Modal, Form,Select } from 'antd'
-import type { TableProps, FormProps } from 'antd'
+import type { TableProps, FormProps} from 'antd'
 import { useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
 import { useNavigate,useSearchParams  } from 'react-router-dom';
 import { AiOutlinePlus,AiOutlineEdit,AiOutlineDelete  } from "react-icons/ai";
+import { TypeCategory } from '../../types/type';
 const { TextArea } = Input;
 const Categories = () => {
     // khai báo type
@@ -13,7 +14,8 @@ const Categories = () => {
         _id: string,
         category_name: string,
         description: string,
-        slug: string
+        slug: string,
+        image: string,
     }
     // pagination
     const navigate = useNavigate();
@@ -60,7 +62,7 @@ const Categories = () => {
     //============== add category ============= //
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);
     const [formAdd] = Form.useForm();
-    const fetchCreateCategory = async (payload: categoryDataType) => {
+    const fetchCreateCategory = async (payload: TypeCategory) => {
         const url = `${globalSetting.URL_API}/categories`;
         const res = await axiosClient.post(url,payload);
         return res.data.data;
@@ -82,17 +84,18 @@ const Categories = () => {
     const showModalAdd = () => {
         setIsModalAddOpen(true);
     }
-    const handleOkAdd = () => {
-        formAdd.submit();
-    }
     const handleCancelAdd = () => {
         setIsModalAddOpen(false);
     }
     const onFinishAdd: FormProps<categoryDataType>['onFinish'] = (values) => {
+        // Gọi hàm mutate
         createMutationCategory.mutate(values)
     }
     const onFinishFailedAdd: FormProps<categoryDataType>['onFinishFailed'] = (errorInfo)=> {
         console.log('Failed:', errorInfo);
+    }
+    const handleOkAdd = () => {
+        formAdd.submit();
     }
     //============== update category ============= //
     const [isModalEditOpen, setIsModalEditOpen] = useState(false);

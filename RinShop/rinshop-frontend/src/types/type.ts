@@ -20,3 +20,10 @@ export type TypeProduct = {
     isNewProduct: boolean, /* SP mới về */
     isShowHome: boolean, // sản phẩm có hiển thị trên trang chủ không.
 }
+export type TProductCart = {
+    _id: string | undefined,
+    product_name: string | undefined,
+    price: number | 0,
+    discount: number | undefined,
+    quantity: number
+}

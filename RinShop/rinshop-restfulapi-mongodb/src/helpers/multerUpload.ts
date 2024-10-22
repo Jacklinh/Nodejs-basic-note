@@ -46,7 +46,7 @@ const uploadImages = multer({
 
 export {
     uploadImage,
-    uploadImages
+    uploadImages,
 }
 
 

@@ -2,11 +2,12 @@ import {useState} from "react";
 import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
 import { useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate,useSearchParams} from 'react-router-dom';
 import {Form,InputNumber,Input,Switch,message,Button, Select,Upload} from 'antd';
 import { CheckOutlined, CloseOutlined,UploadOutlined } from '@ant-design/icons';
-import type { FormProps,UploadProps,UploadFile} from 'antd';
+import type { FormProps,UploadProps,UploadFile,GetProp} from 'antd';
 import { TypeCategory } from '../../types/type';
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 const AddProduct = () => {
 	// khai bao type
     interface productDataType {
@@ -26,43 +27,49 @@ const AddProduct = () => {
         isActive: boolean ,
         file?: UploadFile
     }
-	const navigate = useNavigate();
+	// pagination
+    const navigate = useNavigate();
+	const [params] = useSearchParams();
+    const page_str = params.get('page');
+    const page = page_str ? page_str : 1;
 	const queryClient = useQueryClient();
 	const [formAdd] = Form.useForm();
 	const [fileList, setFileList] = useState<UploadFile[]>([]);
 	const fetchCreateProduct = async (payload: FormData) => {
 		const url = `${globalSetting.URL_API}/products`;
-		const res = await axiosClient.post(url,payload);
+		const res = await axiosClient.post(url,payload,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });;
 		return res.data.data;
 	}
 	const createMutationProduct = useMutation({
 		mutationFn: fetchCreateProduct,
 		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: ['products']
+				queryKey: ['products', page]
 			})
-			message.success('add product success');
+			message.success('Thêm sản phẩm thành công');
 			formAdd.resetFields();
 		},
 		onError: () => {
-			message.error('add product error')
+			message.error('thêm sản phẩm lỗi!')
 		}
 	})
 	const onFinishAdd: FormProps<productDataType>['onFinish'] = (values: productDataType) => {
 		if (fileList.length === 0) {
-			message.error('Vui lòng chọn file trước khi thêm product.');
-			return;
-		}
-
+            message.error('Vui lòng chọn file trước khi thêm product.');
+            return;
+        }
 		const formData = new FormData();
 		// Lặp qua tất cả các trường trong values và thêm chúng vào formData
 		Object.entries(values).forEach(([key, value]) => {
 			formData.append(key,value);
 		});
-
 		fileList.forEach((file) => {
-			formData.append('file', file.originFileObj as File);
-		});
+            formData.append('file', file as FileType);
+        });
 		
 		// Gọi hàm mutate
 		createMutationProduct.mutate(formData);
@@ -99,7 +106,7 @@ const AddProduct = () => {
 	})
 	return (
 		<div className='sec_edit'>
-			<h2>Edit</h2>
+			<h2>Thêm sản phẩm</h2>
 			<Form
 				name="formAdd"
 				onFinish={onFinishAdd}
@@ -180,7 +187,7 @@ const AddProduct = () => {
 							label="Nơi xuất xứ sản phẩm"
 							name="origin"
 							>
-							<Input defaultValue={'Đà Nẵng'}
+							<Input defaultValue='Đà Nẵng'
 							/>
 						</Form.Item>
 						<Form.Item

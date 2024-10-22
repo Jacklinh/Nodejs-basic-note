@@ -21,13 +21,13 @@ const EditProduct = () => {
     };
     //Lấy danh sách product về theo id
     const queryProduct = useQuery({
-        queryKey: ["products-detail"],
+        queryKey: ["products-detail",id],
         queryFn: getProduct,
     });
     let productData = {};
     if (queryProduct.isSuccess) {
         // mặc định axio khi return về res.data.data => data cuối cùng chính là data của chính dự án mình
-        productData = queryProduct.data.data.data;
+        productData = queryProduct.data;
     }
     // render dữ liệu vào form (chú ý name trong form item === name item)
     formUpdate.setFieldsValue(productData);

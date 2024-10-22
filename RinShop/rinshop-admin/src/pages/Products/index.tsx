@@ -1,12 +1,13 @@
 
 import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
-import { useQuery} from '@tanstack/react-query';
+import { useQuery,useQueryClient,useMutation} from '@tanstack/react-query';
 import { useNavigate,useSearchParams  } from 'react-router-dom';
 import type { TableProps,PaginationProps} from 'antd';
-import {Table,Pagination,Button,Space,Popconfirm, Image,Switch} from 'antd'
+import {Table,Pagination,Button,Space,Popconfirm, Image,Switch,message} from 'antd'
 import { AiOutlinePlus,AiOutlineEdit,AiOutlineDelete } from "react-icons/ai";
 import { TypeProduct } from '../../types/type';
+import noImage from '../../assets/noImage.jpg'
 const Products = () => {
     // pagination
     const navigate = useNavigate();
@@ -33,6 +34,25 @@ const Products = () => {
         queryKey: ['products',page],
         queryFn: fetchProduct
     })
+    //============== delete find id ============= //
+    const fetchDeleteProduct = async (id: string) => {
+        const url = `${globalSetting.URL_API}/products/${id}`;
+        const res = await axiosClient.delete(url);
+        return res.data.data;
+    }
+    const queryClient = useQueryClient();
+    const deleteProduct = useMutation({ // sử dụng hook useMutation để biến đổi dữ liệu như thêm , sửa , xoá dữ liệu
+        mutationFn: fetchDeleteProduct,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ // làm mới dữ liệu
+                queryKey: ['products',page]
+            })
+            message.success('Xoá thành công!');
+        },
+        onError: () => {
+            message.error('Xoá lỗi!');
+        },
+    })
     // khai bao columns
     const productColumns: TableProps<TypeProduct>["columns"] = [
         {
@@ -47,13 +67,25 @@ const Products = () => {
             dataIndex: 'thumbnail',
             key: 'thumbnail',
             width: 150,
-            render: (text: string) => (
-                <Image
-                  width={100}
-                  src={`${globalSetting.UPLOAD_DIRECTORY}`+text} // Sử dụng URL hình ảnh từ dữ liệu
-                  alt=""
-                />
-            ),
+            render: (text: string) => {
+                const urlImage = text ? `${globalSetting.UPLOAD_DIRECTORY}`+text : null;
+                return (
+                    urlImage ? (
+                        <Image
+                        width={100}
+                        src= {urlImage}
+                        alt=""
+                        />
+                    ) : (
+                        <Image
+                        width={100}
+                        src={noImage}
+                        alt="No Image"
+                        />
+                    )
+                )
+                
+            },
         },
         {
             title: 'Category',
@@ -61,7 +93,7 @@ const Products = () => {
             width: 120,
             key: 'category',
             render: (_, record)=> {
-                return <span>{record.category.category_name}</span>
+                return <span>{record.category?.category_name || null}</span>
             }
         },
         {
@@ -123,7 +155,8 @@ const Products = () => {
             key: 'action',
             width: 150,
             fixed: 'right',
-            render: (_,record) => (
+            render: (_, record) => (
+                
                 <Space size="middle">
                     <Button 
                     type="primary" 
@@ -135,11 +168,11 @@ const Products = () => {
                     }}
                     ></Button>
                     <Popconfirm
-                        title="Delete category"
-                        description="Are you sure to delete this category?"
+                        title="Xoá sản phẩm"
+                        description="Bạn có muốn xoá sản phẩm này?"
                         onConfirm={()=> {
                             // gọi xử lý xoá bằng cách mutate ánh xạ
-                           
+                            deleteProduct.mutate(record._id)
                         }}
                         okText="Yes"
                         cancelText="No"
@@ -159,14 +192,20 @@ const Products = () => {
     return (
         <>
             <div className="box_heading">
-                <h2>Product</h2>
+                <h2>SẢN PHẨM</h2>
                 
                 <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>navigate(`/products/add`)} className='common_button'>Add Product</Button>
             </div>
-            <Table columns={productColumns} dataSource={getProduct?.data?.products_list || [] } scroll={{ x: 1500 }} pagination={false } />
+            <Table 
+            columns={productColumns} 
+            rowKey={(record) => record._id}
+            dataSource={getProduct?.data?.products_list || [] } scroll={{ x: 1500 }} 
+            pagination={false } 
+            />
             <Pagination 
+            className='pagination_page'
             defaultCurrent={1} 
-            pageSize={getProduct?.data?.pagination.limit}
+            pageSize={getProduct?.data?.pagination.limit || 5}
             total={getProduct?.data?.pagination.totalRecords || 0}
             onChange={onChangePagination} 
 		    />;
