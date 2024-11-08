@@ -29,7 +29,7 @@ const MainVisual = () => {
                         alt="slide-bg-10"
                         width={1920} 
                         height={650} 
-                        priority={true}
+                        loading='lazy'
                     />
                 </div>
                 <div className={styles.mainvs_cnt}>
@@ -48,7 +48,7 @@ const MainVisual = () => {
                         alt="slide-bg-11"
                         width={1920} 
                         height={650} 
-                        priority={true}
+                        loading='lazy'
                     />
                 </div>
                 <div className={styles.mainvs_cnt}>

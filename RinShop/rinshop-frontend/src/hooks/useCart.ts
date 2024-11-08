@@ -12,7 +12,9 @@ interface TCart {
   increase: (id: string | undefined) => void,
   decrement: (id: string | undefined) => void,
   totalAmount: number,
-  calculateTotalAmount: () => void
+  calculateTotalAmount: () => void,
+  clearCart: () => void,
+  shippingFee: number | 0
 }
 export const useCart = create(
     persist<TCart>(
@@ -22,7 +24,10 @@ export const useCart = create(
           // tính tổng số tiền các sản phẩm trong giỏ hàng
           calculateTotalAmount: () => {
             const products = get().products;
-            const total = products.reduce((sum, product) => sum + product.quantity * product.price, 0);
+            const total = products.reduce((sum, product) => {
+                const discountedPrice = product.price * (1 - (product.discount || 0) / 100) || 0;
+                return sum + product.quantity * discountedPrice;
+            }, 0);
             set({totalAmount: total})
           },
           // tính tổng số sản phầm trong giỏ hàng
@@ -66,7 +71,19 @@ export const useCart = create(
             set({products : updateProducts})
             // cập nhật lại totalAmount
             get().calculateTotalAmount();
-          }
+          },
+          // xoá toàn bộ giỏ hàng
+          clearCart: ()=>{
+            set({
+              products: [],
+            });
+            //clear local Storage
+            localStorage.removeItem(localName)
+             // cập nhật lại totalAmount
+             get().calculateTotalAmount();
+          },
+          // phí vận chuyển(nếu có)
+          shippingFee: 0
         }),
         {
           name: localName, 

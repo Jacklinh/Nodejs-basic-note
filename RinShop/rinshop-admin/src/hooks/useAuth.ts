@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { axiosClient } from "../library/axiosClient";
 import { devtools, persist } from "zustand/middleware";
-import { createJSONStorage } from "zustand/middleware"; // Import createJSONStorage
+import { createJSONStorage } from "zustand/middleware"; 
 import { globalSetting } from "../constants/configs";
 interface User {
   _id: string;

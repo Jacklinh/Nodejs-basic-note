@@ -20,6 +20,11 @@ const categorySchema = new Schema<TypeCategory>({
         maxLength: 50,
         trim: true,
         required: false
+    },
+    banner: {
+        type: String,
+        maxLength: 255,
+        required: false
     }
 },{
     timestamps: true

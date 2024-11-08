@@ -9,7 +9,9 @@ router.get('',categoriesController.findAll)
 router.get('/:id',categoriesController.findByID)
 //3. Create a new category
 //POST localhost:8000/api/v1/categories
-router.post('',categoriesController.createRecord)
+//router.post('',categoriesController.createRecord)
+// khi có up image
+router.post('',categoriesController.createDocument)
 //4. Update a category
 //PUT localhost:8000/api/v1/categories/:id
 router.put('/:id',categoriesController.updateByID)

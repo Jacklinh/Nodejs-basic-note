@@ -10,7 +10,7 @@ const staffSchema = new Schema<TypeStaff>({
     },
     phone: {
         type: String,
-        maxlength: 50,
+        maxlength: 10,
         match: /^[0-9]{10}$/
     },
     email: {

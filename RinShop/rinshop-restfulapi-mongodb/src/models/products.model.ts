@@ -9,11 +9,12 @@ const productSchema = new Schema<TypeProduct>({
         unique: true,
         trim: true
     },
-      price: {
+    price: {
         type: Number,
         min: 0,
-        default: 0
+        default: 0,
     },
+    // giá khuyến mãi
     discount: {
         type: Number,
         min: 0,
@@ -27,9 +28,9 @@ const productSchema = new Schema<TypeProduct>({
     description: {
         type: String,
         require: false,
-        maxlength: 500,
-        trim: true
+        trim: false
     },
+    // xuất xứ
     origin: {
         type: String,
         require: false,
@@ -40,28 +41,32 @@ const productSchema = new Schema<TypeProduct>({
         trim: true,
         require: false
     },
+    // ảnh đại diện
     thumbnail: {
         type: String,
         maxlength: 255,
         require: false,
     },
+    // các ảnh khác
     gallery: {
         type: String,
         maxlength: 255,
         require: false,
     },
+    // số lượng sản phẩm tồn kho
     stock: {
         type: Number,
         min: 0,
         default: 0,
         require: false,
     },
+    // trạng thái sản phẩm
     isActive: {
         type: Boolean,
         drequire: false,
         default: false
     },
-    /* SP bán nổi bật */
+    /* SP bán chạy */
     isBest: {
         type: Boolean,
         require: false,
@@ -88,6 +93,10 @@ productSchema.pre('validate', async function(next){
         throw createError(400,"product name not found");
     }
     this.slug = buildSlug(this.product_name);
+    const _price = this as any;
+    if(_price.price) {
+        _price.price = parseInt(_price.price, 10); // Chuyển thành số nguyên
+    }
     next();
 })
 const Product = model<TypeProduct>('Product',productSchema);

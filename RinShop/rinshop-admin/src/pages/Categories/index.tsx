@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import {Table,Pagination,Input,Button,Space,message, Popconfirm, Modal, Form,Select } from 'antd'
-import type { TableProps, FormProps} from 'antd'
+import {Table,Pagination,Input,Button,Space,message, Popconfirm, Modal, Form,Select, Image, Upload } from 'antd'
+import type { TableProps, FormProps, UploadProps, UploadFile, GetProp} from 'antd'
+import { UploadOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
 import { useNavigate,useSearchParams  } from 'react-router-dom';
-import { AiOutlinePlus,AiOutlineEdit,AiOutlineDelete  } from "react-icons/ai";
+import { AiOutlinePlus,AiOutlineEdit,AiOutlineDelete } from "react-icons/ai";
 import { TypeCategory } from '../../types/type';
 const { TextArea } = Input;
+import noImage from '../../assets/noImage.jpg'
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 const Categories = () => {
     // khai báo type
     interface categoryDataType {
@@ -15,24 +18,26 @@ const Categories = () => {
         category_name: string,
         description: string,
         slug: string,
-        image: string,
+        banner: string,
+        file?: UploadFile
     }
     // pagination
     const navigate = useNavigate();
     const [params] = useSearchParams();
-    const limit = 5;
+    const limit = 4;
     const page_str = params.get('page');
-    const page = page_str ? page_str : 1;
+    const page = page_str ? parseInt(page_str) : 1;
+    
     // filter category name
     const categoryName_str = params.get('categoryName');
     const categoryName = categoryName_str  ? categoryName_str : '';
     //============== get all category ============= //
     const fetchCategory = async() => {
         let url= `${globalSetting.URL_API}/categories?`;
-        if(categoryName) {
+        if(categoryName !== '') {
             url += `categoryName=${categoryName}&`;
         }
-        url += `page=${page_str}&limit=${limit}`;
+        url += `page=${page}&limit=${limit}`;
         const res = await axiosClient.get(url);
         return res.data.data;
     }
@@ -53,32 +58,52 @@ const Categories = () => {
             queryClient.invalidateQueries({ // làm mới dữ liệu
                 queryKey: ['categories',page]
             })
-            message.success('Delete success');
+            message.success('Xoá thành công!');
         },
         onError: () => {
-            message.error('Delete error');
+            message.error('Xoá lỗi!');
         },
     })
     //============== add category ============= //
     const [isModalAddOpen, setIsModalAddOpen] = useState(false);
     const [formAdd] = Form.useForm();
-    const fetchCreateCategory = async (payload: TypeCategory) => {
+    const fetchCreateCategory = async (payload: FormData) => {
         const url = `${globalSetting.URL_API}/categories`;
-        const res = await axiosClient.post(url,payload);
+        const res = await axiosClient.post(url,payload,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return res.data.data;
     }
+    //============== add  banner ============= //
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const propsUploadAdd: UploadProps = {
+		onRemove: (file) => {
+			const index = fileList.indexOf(file);
+			const newFileList = fileList.slice();
+			newFileList.splice(index, 1);
+			setFileList(newFileList);
+		},
+		beforeUpload: (file) => {
+		setFileList([file]);  // Chỉ chọn một file, nếu cần nhiều file thì sử dụng `setFileList([...fileList, file])`
+		return false;  // Tắt upload tự động
+		},
+		fileList,
+	};
+    //============== end add banner ============= //
     const createMutationCategory = useMutation({
         mutationFn: fetchCreateCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ['categories',page]
             })
-            message.success('add category success');
+            message.success('Thêm thành công!');
             setIsModalAddOpen(false)
             formAdd.resetFields();
         },
         onError: () => {
-            message.error('add category error')
+            message.error('Thêm lỗi!')
         }
     })
     const showModalAdd = () => {
@@ -87,9 +112,25 @@ const Categories = () => {
     const handleCancelAdd = () => {
         setIsModalAddOpen(false);
     }
-    const onFinishAdd: FormProps<categoryDataType>['onFinish'] = (values) => {
-        // Gọi hàm mutate
-        createMutationCategory.mutate(values)
+    const onFinishAdd: FormProps<categoryDataType>['onFinish'] = (values: categoryDataType) => {
+        // xử lý khi upload file
+		if (fileList.length === 0) {
+            message.error('Vui lòng chọn file trước khi thêm product.');
+            return;
+        }
+		const formData = new FormData();
+		// Lặp qua tất cả các trường trong values và thêm chúng vào formData
+		Object.entries(values).forEach(([key, value]) => {
+			formData.append(key,value);
+		});
+		fileList.forEach((file) => {
+            formData.append('file', file as FileType);
+        });
+		
+		// Gọi hàm mutate
+		createMutationCategory.mutate(formData);
+        // Gọi hàm mutate nếu k có image
+        //createMutationCategory.mutate(values)
     }
     const onFinishFailedAdd: FormProps<categoryDataType>['onFinishFailed'] = (errorInfo)=> {
         console.log('Failed:', errorInfo);
@@ -112,12 +153,12 @@ const Categories = () => {
             queryClient.invalidateQueries({
                 queryKey: ['categories',page]
             })
-            message.success('update category success!');
+            message.success('Cập nhật thành công!');
             setIsModalEditOpen(false);
             formUpdate.resetFields();
         },
         onError: () => {
-            message.error('update category error!')
+            message.error('Cập nhật lỗi!')
         }
     })
     const showModalEdit = () => {
@@ -137,15 +178,33 @@ const Categories = () => {
       const onFinishFailedEdit: FormProps<categoryDataType>['onFinishFailed'] = (errorInfo) => {
         console.log('Failed:', errorInfo);
       };
+     //============== edit upload image ============= //
+     const propsUploadSingle: UploadProps = {
+        action: `${globalSetting.URL_API}/upload/photo`,
+        listType: 'picture',
+        maxCount: 1,
+        onChange: (file) => {
+          // Kiểm tra xem việc upload có thành công không
+          if (file.file.status === 'done') {
+            const imageUrl = file.file.response.data.link;
+            formUpdate.setFieldValue('banner', imageUrl); // Cập nhật giá trị của input banner
+          }
+        },
+        onRemove: () => {
+          formUpdate.setFieldValue('banner', null); // Clear giá trị khỏi input banner
+          // Gọi API xóa hình ảnh trên server (cần thêm API thực hiện việc này)
+        },
+    };
+    //============== end edit upload image ============= //
     //============== filter categry name  ============= //
     const fetchFilterCategory = async () => {
-        const url = `${globalSetting.URL_API}/categories`;
+        const url= `${globalSetting.URL_API}/categories`;
         const res = await axiosClient.get(url);
         return res.data.data;
     }
     const filterCategory = useQuery({
         queryFn: fetchFilterCategory,
-        queryKey: ['categories']
+        queryKey: ['categories-tree']
     })
     const onChangeFilter = (value: string) => {
         if(value !== '') {
@@ -158,12 +217,12 @@ const Categories = () => {
     // khai bao columns
     const categoryColumns: TableProps<categoryDataType>["columns"] = [
         {
-            title: 'Category Name',
+            title: 'Tên danh mục',
             dataIndex: 'category_name',
             key: 'category_name'
         },
         {
-            title: 'Description',
+            title: 'Chi tiết',
             dataIndex: 'description',
             key: 'description'
         },
@@ -173,7 +232,32 @@ const Categories = () => {
             key: 'slug'
         },
         {
-            title: 'Action',
+            title: 'Hình ảnh',
+            dataIndex: 'banner',
+            key: 'banner',
+            width: 150,
+            render: (text: string) => {
+                const urlImage = text ? `${globalSetting.UPLOAD_DIRECTORY}`+text : null;
+                return (
+                    urlImage ? (
+                        <Image
+                        width={100}
+                        src= {urlImage}
+                        alt=""
+                        />
+                    ) : (
+                        <Image
+                        width={100}
+                        src={noImage}
+                        alt="No Image"
+                        />
+                    )
+                )
+                
+            },
+        },
+        {
+            title: 'Hành động',
             key: 'action',
             render: (_,record) => (
                 <Space size="middle">
@@ -188,14 +272,14 @@ const Categories = () => {
                       }}
                     ></Button>
                     <Popconfirm
-                        title="Delete category"
-                        description="Are you sure to delete this category?"
+                        title="Xoá danh mục sản phẩm"
+                        description="Bạn có muốn xoá danh mục sản phẩm này phải không?"
                         onConfirm={()=> {
                             // gọi xử lý xoá bằng cách mutate ánh xạ
                             deleteCategory.mutate(record._id)
                         }}
-                        okText="Yes"
-                        cancelText="No"
+                        okText="Xoá"
+                        cancelText="Không xoá"
                     >
                         <Button 
                         type="primary" 
@@ -215,13 +299,13 @@ const Categories = () => {
                 <h2>DANH MỤC SẢN PHẨM</h2>
                 <Select
                     showSearch
-                    placeholder="Select a category name"
+                    placeholder="Lọc theo danh mục sản phẩm"
                     optionFilterProp="label"
                     onChange={onChangeFilter}
                     options={[
                     {
                         value: '',
-                        label: 'All Category',
+                        label: 'Tất cả',
                     },
                     ...(filterCategory?.data
                         ? filterCategory.data.categories_list.map((c:categoryDataType) => ({
@@ -231,27 +315,27 @@ const Categories = () => {
                         : []),
                     ]}
                 />
-                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>{showModalAdd()}} className='common_button'>Thêm danh mục</Button>
+                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>{showModalAdd()}} className='common_button btn_add'>Thêm danh mục</Button>
             </div>
-            <Table
-            columns={categoryColumns} 
-            dataSource={getCategory?.data?.categories_list || [] } 
-            rowKey={(record) => record._id}
-            pagination={false } />
-            <Pagination 
-                className='pagination_page'
-                defaultCurrent={1} 
-                pageSize={getCategory?.data?.pagination.limit || 5}
-                total={getCategory?.data?.pagination.totalRecords || 0}
-                onChange={(page) => {
-                    // thay đổi url
-                    if(page !== 1) {
-                        navigate(`/categories?page=${page}`)
-                    }else {
-                        navigate(`/categories`)
-                    }
-                }} 
-		    />;
+            <div className="data_table">
+                <Table
+                columns={categoryColumns} 
+                dataSource={getCategory?.data?.categories_list || [] } 
+                rowKey={(record) => record._id}
+                pagination={false} />
+                <Pagination 
+                    className='pagination_page'
+                    defaultCurrent={1} 
+                    current={page} 
+                    align="center"
+                    pageSize={getCategory?.data?.pagination.limit || 5}
+                    total={getCategory?.data?.pagination.totalRecords || 0}
+                    onChange={(p) => {
+                        navigate(`/categories?page=${p}`)
+                    }} 
+                />
+            </div>
+            
             {/* modal edit */}
             <Modal
                 title="CẬP NHẬT DANH MỤC"
@@ -296,7 +380,19 @@ const Categories = () => {
                 >
                 <TextArea rows={4} />
                 </Form.Item>
+                <Form.Item label="Hình ảnh giới thiệu" name="banner">
+                    <Input />
+                </Form.Item>
+                <Form.Item<TypeCategory>
+                    label="Hình ảnh giới thiệu"
+                    name="banner"
+                >
+                <Upload {...propsUploadSingle} >
+                <Button icon={<UploadOutlined />}>Tải hình ảnh lên</Button>
+                </Upload>
+                </Form.Item>
                 </Form>
+
             </Modal>
             {/* modal add  */}
             <Modal
@@ -334,6 +430,14 @@ const Categories = () => {
             hasFeedback
             >
             <TextArea rows={4} />
+            </Form.Item>
+            <Form.Item<categoryDataType>
+                label="Hình ảnh giới thiệu"
+                name="banner"
+            >
+            <Upload {...propsUploadAdd} >
+            <Button icon={<UploadOutlined />}>Tải hình ảnh lên</Button>
+            </Upload>
             </Form.Item>
             </Form>
             </Modal>

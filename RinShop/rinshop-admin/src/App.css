@@ -1,20 +1,57 @@
 
-body {
+body,
+#root {
     display: block !important;
     min-width: 100% !important;
 }
 :root {
-    --main-background: #f3f4f6;
+    --main-background: #fbfeff;
     --main-color: #009f7f;
     --body-color: #222222;
     --bg-gray: #F3F4F6;
     --bg-white: #ffffff;
+    --theme-color: #0da487;
+    --body-background: #f9f9f6;
+    --body-background-active: #ffa53b;
 }
 #root,
 #root *,
 #root *:before,
 #root *:after {
     box-sizing: border-box;
+}
+/* layout */
+.page-body-wrapper {
+    background-color: var(--main-background);
+}
+.sidebar-wrapper {
+    width: 280px !important;
+    flex: 0 0 280px !important; 
+    max-width: 280px !important;
+    min-width: 280px !important;
+    height: auto;
+    text-align: left;
+    overflow: hidden;
+    color: #ffffff;
+    background: linear-gradient(-45deg, #0da487, #009289, #ffa53b) !important;
+    background-size: 400% 400%;
+}
+.sidebar-menu {
+    background: transparent;
+    color: #ffffff;
+}
+.sidebar-menu li {
+    color: #ffffff !important;
+}
+.sidebar-menu li.ant-menu-item-selected {
+    background-color: var(--body-background-active);
+}
+.page-body{
+    background-color: var(--body-background);
+}
+.content-wrapper {
+    background-color: var(--body-background);
+    padding: 25px;
 }
 .responsive_image {
     max-width: 100%;
@@ -34,14 +71,17 @@ p {
 .form_search input {
     min-height: 40px;
     min-width: 300px;
+    background-color: var(--body-background);
+    border: 0;
 }
 .form_search button {
     min-height: 40px;
 }
 .form_search button[type="submit"] {
-    background-color: var(--main-color);
+    background-color: var(--body-background-active);
     font-weight: 500;
     text-transform: uppercase;
+    box-shadow: none;
 }
 .form_search button[type="submit"]:disabled {
     opacity: 0.5;
@@ -53,6 +93,17 @@ p {
 /* button style */
 .common_button {
     background-color: var(--main-color);
+}
+.btn_add {
+    border-radius: 15px;
+    height: auto;
+    padding: 10px 15px;
+    font-size: 1.15rem;
+}
+.data_table {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 25px;
 }
 /* box_heading */
 .box_heading{
@@ -76,6 +127,7 @@ p {
     flex-flow: row wrap;
     margin-bottom: 30px;
     width: 100%;
+    overflow: hidden;
 }
 .form_edit_item .form_edit_ttl {
     width: 40%;
@@ -86,6 +138,10 @@ p {
     color: #222222;
     padding: 20px;
     border-radius: 10px;
+    overflow: hidden;
+}
+.ckeditor_content .ck-editor__editable {
+    min-height: 200px;
 }
 /* pagination_page */
 .pagination_page {
@@ -99,3 +155,4 @@ p {
     padding: 15px;
     text-align: center;
 }
+/* box_order_detail */

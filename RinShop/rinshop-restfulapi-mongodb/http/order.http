@@ -1,0 +1,24 @@
+###
+
+#TH1. khách hàng mới
+POST http://localhost:8000/api/v1/orders
+Content-Type: application/json
+
+{
+  "customer": {
+    "fullName": "vana linh",
+    "phone": "0322681138",
+    "email": "jacklinha79@gmail.com",
+    "address": "da nang",
+    "password": "customerdemo@2024"
+  },
+  "payment_type": 1,
+    "order_items": 
+    {
+        "product": "66fe50cc7143fd7bf2e7e546",
+        "product_name": "Cà rốt",
+        "price": 20000,
+        "discount": 5,
+        "quantity": 1
+    }
+}

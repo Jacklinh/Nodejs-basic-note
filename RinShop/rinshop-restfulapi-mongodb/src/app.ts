@@ -7,7 +7,9 @@ import staffsRoute  from './routes/v1/staffs.route'
 import authRoute from './routes/v1/auth.route'
 import categoriesRoute from './routes/v1/categories.route';
 import productsRoute from './routes/v1/products.route';
-import uploadRouter from './routes/v1/upload.route'
+import uploadRouter from './routes/v1/upload.route';
+import customersRoute from './routes/v1/customers.route';
+import ordersRoute from './routes/v1/orders.route';
 import cors from 'cors'
 // upload image
 const app: Express = express();
@@ -25,6 +27,8 @@ app.use('/api/v1/categories',categoriesRoute)
 app.use('/api/v1/products',productsRoute)
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/upload', uploadRouter)
+app.use('/api/v1/customers', customersRoute)
+app.use('/api/v1/orders', ordersRoute)
 // errors 404, not found
 app.use((rep: Request, res: Response, next: NextFunction) => {
     next(createError(404))

@@ -8,23 +8,9 @@ import {
 import { TbUsersGroup,TbCategory } from "react-icons/tb"
 import type { MenuProps } from 'antd';
 import { Layout, Menu} from 'antd';
-// import images
-import logo from '../../../assets/logo5.png'
 import HeaderAdmin from './HeaderAdmin';
-import styles from './LayoutAdmin.module.css'
+import Logo from '../../Logo';
 const { Content, Footer, Sider } = Layout;
-const siderStyle: React.CSSProperties = {
-  overflow: 'auto',
-  height: '100vh',
-  position: 'fixed',
-  insetInlineStart: 0,
-  top: 0,
-  bottom: 0,
-  scrollbarWidth: 'thin',
-  scrollbarColor: 'unset',
-  background: '#ffffff',
-};
-
 const items: MenuProps['items'] = [
    {    
         label: "MAIN",
@@ -39,7 +25,7 @@ const items: MenuProps['items'] = [
        
    },
    {    
-label: "QUẢN LÝ SẢN PHẨM",
+    label: "QUẢN LÝ SẢN PHẨM",
     type: "group",
     children: [
         {
@@ -56,16 +42,31 @@ label: "QUẢN LÝ SẢN PHẨM",
    
     },
     {    
-        label: "NGƯỜI DÙNG",
+        label: "QUẢN LÝ NGƯỜI DÙNG",
         type: "group",
         children: [
             {
                 key: "staffs",
                 icon: <TbUsersGroup />,
                 label: "NHÂN VIÊN"
+            },
+            {
+                key: "customers",
+                icon: <TbUsersGroup />,
+                label: "KHÁCH HÀNG"
             }
         ],
-        
+    },
+    {    
+        label: "QUẢN LÝ ĐƠN HÀNH",
+        type: "group",
+        children: [
+            {
+                key: "orders",
+                icon: <TbUsersGroup />,
+                label: "ĐƠN HÀNG"
+            }
+        ],
     }
 ];
 const LayoutAdmin = () => {
@@ -80,24 +81,22 @@ const LayoutAdmin = () => {
         }
     }, [navigate, isAuthenticated]);
     return (
-        <div>
-            <Layout hasSider style={{ minHeight: "100vh" }}>
-                <Sider style={siderStyle} className={styles.box_siderbar}>
-                    <div className="demo-logo-vertical">
-                        <p><img className='responsive_image' src={logo} width={220} height={220} alt="rinshop" /></p>
-                    </div>
+        <>
+            <Layout style={{ minHeight: "100vh" }} className='page-body-wrapper'>
+                <Sider className='sidebar-wrapper'>
+                    <Logo />
                     <Menu 
-                        theme="light" 
                         mode="inline" 
+                        className='sidebar-menu'
                         items={items} 
                         onClick={({ key }) => {
                         navigate("/" + key.split("-").join("/"));
                     }} 
                     />
                 </Sider>
-                <Layout style={{ marginInlineStart: 200 }}>
+                <Layout className='page-body'>
                     <HeaderAdmin />
-                    <Content style={{ margin: '24px 16px', overflow: 'initial' }}>
+                    <Content className='content-wrapper'>
                         <Outlet />
                     </Content>
                     <Footer className='sec_footer'>
@@ -105,7 +104,7 @@ const LayoutAdmin = () => {
                     </Footer>
                 </Layout>
             </Layout>
-        </div>
+        </>
     )
 }
 

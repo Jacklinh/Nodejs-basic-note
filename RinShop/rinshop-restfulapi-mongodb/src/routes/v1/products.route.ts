@@ -3,10 +3,13 @@ import productsController from "../../controllers/products.controller";
 import { authenticateToken } from "../../middlewares/auth.middleware";
 const router = express.Router();
 // route public
-router.get('/slug/:slug',productsController.findAllCategoryBySlug)
+router.get('/slug/:slug',productsController.findAllByCate)
+//router product and related product 
 router.get('/details/:slug',productsController.findOneBySlug)
+//GET localhost:8000/api/v1/products/isbest
+router.get('/isbest',productsController.findByIsBest)
 // check token để các route là private
-router.use(authenticateToken)
+// router.use(authenticateToken)
 // 1 get all products
 //GET localhost:8000/api/v1/products
 router.get('',productsController.findAll)

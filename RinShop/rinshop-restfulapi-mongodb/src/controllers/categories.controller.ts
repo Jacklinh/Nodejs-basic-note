@@ -29,6 +29,37 @@ const createRecord = async (req: Request, res: Response, next: NextFunction) => 
         next(error)
     }
 }
+const createDocument = async (req: Request, res: Response, next: NextFunction)=>{
+    try {
+        uploadImage(req, res, async function (error) {
+        if (error instanceof multer.MulterError) {
+           // 1 lỗi của Multer xảy ra khi upload.
+           res.status(500).json({
+              statusCode: 500,
+              message: error.message,
+              typeError: 'MulterError'
+          })
+        } else if (error) {
+          // 1 lỗi không xác định xảy ra khi upload.
+          res.status(500).json({
+              statusCode: 500,
+              message: error.message,
+              typeError: 'UnKnownError'
+          })
+        }
+        else{
+        //Nếu upload hình thành công thì mới tạo sản phẩm
+        const product = await categoriesService.createDocument({
+            ...req.body,
+            banner: `uploads/${req.file?.filename}`, //cập nhật lại link sản phẩm
+        })
+        sendJsonSuccess(res)(product)
+        }
+      })
+    } catch (error) {
+      next(error)
+    }
+}
 const updateByID = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {id} = req.params;
@@ -52,6 +83,7 @@ export default {
     findAll,
     findByID,
     createRecord,
+    createDocument,
     updateByID,
     deleteByID
 }

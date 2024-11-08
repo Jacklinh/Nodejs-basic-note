@@ -15,7 +15,7 @@ const Products = () => {
     const limit_str = params.get("limit");
     const page_str = params.get('page');
     const page = page_str ? parseInt(page_str) : 1;
-    const limit = limit_str ? parseInt(limit_str) : 5;
+    const limit = limit_str ? parseInt(limit_str) : 7;
     const onChangePagination: PaginationProps["onChange"] = (page) => {
         if(page !== 1) {
             navigate(`/products?page=${page}`)
@@ -56,14 +56,14 @@ const Products = () => {
     // khai bao columns
     const productColumns: TableProps<TypeProduct>["columns"] = [
         {
-            title: 'Product Name',
+            title: 'Tên SP',
             dataIndex: 'product_name',
             key: 'product_name',
-            width: 150,
+            width: 100,
             fixed: 'left',
         },
         {
-            title: 'Thumbnail',
+            title: 'Hình ảnh',
             dataIndex: 'thumbnail',
             key: 'thumbnail',
             width: 150,
@@ -73,6 +73,7 @@ const Products = () => {
                     urlImage ? (
                         <Image
                         width={100}
+                        height={100}
                         src= {urlImage}
                         alt=""
                         />
@@ -80,6 +81,7 @@ const Products = () => {
                         <Image
                         width={100}
                         src={noImage}
+                        height={100}
                         alt="No Image"
                         />
                     )
@@ -88,7 +90,7 @@ const Products = () => {
             },
         },
         {
-            title: 'Category',
+            title: 'Danh mục',
             dataIndex: 'category',
             width: 120,
             key: 'category',
@@ -97,61 +99,47 @@ const Products = () => {
             }
         },
         {
-            title: 'Price',
+            title: 'Giá/KG',
             dataIndex: 'price',
             key: 'price',
-            render: (text: number) => `${text} VNĐ`,
+            width: 150,
+            render: (text: number) => `${text.toLocaleString('vi-VN')} VNĐ`,
         },
         {
-            title: 'Discount',
-            dataIndex: 'discount',
-            key: 'discount',
-            render: (text: number) => `${text} %`,
-        },
-        {
-            title: 'stock',
+            title: 'Số lượng tồn kho',
             dataIndex: 'stock',
             key: 'stock',
+            width: 100,
         },
         {
-            title: 'Origin',
-            dataIndex: 'origin',
-            key: 'origin'
-        },
-        {
-            title: 'Best',
+            title: 'SP nổi bật',
             dataIndex: 'isBest',
             key: 'isBest',
+            width: 70,
             render: (active: boolean) => (
                 <Switch size="small" checked={active} />
             ),
         },
         {
-            title: 'NewProduct',
+            title: 'SP mới về',
             dataIndex: 'isNewProduct',
             key: 'isNewProduct',
+            width: 70,
             render: (active: boolean) => (
                 <Switch size="small" checked={active} />
             ),
         },
         {
-            title: 'ShowHome',
-            dataIndex: 'isShowHome',
-            key: 'isShowHome',
-            render: (active: boolean) => (
-                <Switch size="small" checked={active} />
-            ),
-        },
-        {
-            title: 'Active',
+            title: 'Trạng thái',
             dataIndex: 'isActive',
             key: 'isActive',
+            width: 70,
             render: (active: boolean) => (
                 <Switch size="small" checked={active} />
             ),
         },
         {
-            title: 'Action',
+            title: 'Hành động',
             key: 'action',
             width: 150,
             fixed: 'right',
@@ -192,23 +180,27 @@ const Products = () => {
     return (
         <>
             <div className="box_heading">
-                <h2>SẢN PHẨM</h2>
+                <h2>DANH SÁCH SẢN PHẨM</h2>
                 
-                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>navigate(`/products/add`)} className='common_button'>Add Product</Button>
+                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>navigate(`/products/add`)} className='common_button btn_add'>Thêm sản phẩm mới</Button>
             </div>
-            <Table 
-            columns={productColumns} 
-            rowKey={(record) => record._id}
-            dataSource={getProduct?.data?.products_list || [] } scroll={{ x: 1500 }} 
-            pagination={false } 
-            />
-            <Pagination 
-            className='pagination_page'
-            defaultCurrent={1} 
-            pageSize={getProduct?.data?.pagination.limit || 5}
-            total={getProduct?.data?.pagination.totalRecords || 0}
-            onChange={onChangePagination} 
-		    />;
+            <div className="data_table">
+                <Table 
+                columns={productColumns} 
+                rowKey={(record) => record._id}
+                dataSource={getProduct?.data?.products_list || [] } scroll={{ x: 1500 }} 
+                pagination={false } 
+                />
+                <Pagination 
+                className='pagination_page'
+                defaultCurrent={1} 
+                current={page} 
+                align='center'
+                pageSize={getProduct?.data?.pagination.limit || 5}
+                total={getProduct?.data?.pagination.totalRecords || 0}
+                onChange={onChangePagination} 
+                />;
+            </div>
         </>
     )
 }

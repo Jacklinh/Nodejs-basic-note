@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Pagination, Input, Button, Space,message, Popconfirm, Modal, Form, Switch, Select} from 'antd';
+import { Table, Pagination, Input, Button, Space,message, Popconfirm, Modal, Form, Switch} from 'antd';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
@@ -8,7 +8,6 @@ import { AiOutlinePlus,AiOutlineEdit,AiOutlineDelete  } from "react-icons/ai";
 import type {TableProps,FormProps } from 'antd';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { TypeStaff } from '../../types/type';
-import useAuth from '../../hooks/useAuth';
 const Staffs = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -147,7 +146,7 @@ const Staffs = () => {
 	// duyệt qua từng cặp key -value trong object
 	for(const[key,value] of Object.entries(values)) {
 		if(value !== undefined && value !== '') {
-			params.append(key,value);
+			params.append(key,String(value));
 		}
 	}
 	const searchString = params.toString();
@@ -166,7 +165,6 @@ const Staffs = () => {
   };
 
   // columns
-  const { user } = useAuth();
   const columns :TableProps<TypeStaff>['columns'] = [
 	{
 	  title: 'Full Name',

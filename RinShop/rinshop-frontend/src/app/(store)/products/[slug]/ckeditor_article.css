@@ -1,0 +1,91 @@
+.article-content {
+    display: block;
+    overflow: hidden;
+    margin: auto;
+}
+
+.article-content p,
+.article-content h2,
+.article-content h3,
+.article-content h4 {
+    margin: 20px auto;
+    font-size: 16px;
+    color: #333;
+    line-height: 28px
+}
+
+.article-content h3, .article-content h2 {
+    font-size: 18px;
+    line-height: 30px;
+    font-weight: bold;
+}
+
+.article-content img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    margin: 0 auto
+}
+
+.article-content a, .article-content a:hover, .article-content a:active {color: #288ad6}
+.article-content h3, .article-content h3 a {color:#1d71ab}
+.article-content h2, .article-content h2 a {color:#1d71ab}
+.article-content h4, .article-content h4 a{color:#1d71ab}
+
+.article-content ul,
+.article-content ol {
+    margin: 10px auto;
+}
+
+.article-content ul li {
+    list-style-type: disc;
+    margin-left: 15px;
+    line-height: 25px;
+    font-size: 16px
+}
+
+.article-content table {
+    margin: 10px auto;
+    border-collapse: collapse;
+    max-width: 100%;
+    font-weight: 300;
+    width: 100%
+}
+
+.article-content  table+table {
+    margin-top: 15px
+}
+
+.article-content table ul,
+.article-content table ol {
+    width: auto
+}
+
+.article-content td,
+.article-content th {
+    padding: .3em;
+    border: 1px #ccc solid;
+    width: auto
+}
+
+.article-content td p,
+.article-content th p {
+    width: auto
+}
+
+.article-content .fbiframe {
+    text-align: center
+}
+
+.article-content table{width: 100%; max-width: 100%;border-collapse: collapse; }
+.article-content table>thead>tr>th {border-bottom: 1px solid #bbb; text-align: left; font-weight: 600; }
+.article-content table>tbody>tr>td, .article-content table>tbody>tr>th, .article-content table>tfoot>tr>td, .article-content table>tfoot>tr>th, .article-content table>thead>tr>td, .article-content table>thead>tr>th {
+    padding: 8px 10px; line-height: 1.5384616; vertical-align: middle; border-top: 1px solid #ddd
+}
+.article-content table td, .article-content table th, .article-content table tr{transition: background-color .15s ease-in-out }
+.article-content table tbody>tr:nth-of-type(odd) {background-color: #fcfcfc; }
+.article-content table>tbody>tr:hover, .article-content table>tbody>tr.active>td, .article-content table>tbody>tr.active>th, .article-content table>tbody>tr>td.active, .article-content table>tbody>tr>th.active, .article-content table>tfoot>tr.active>td, .article-content table>tfoot>tr.active>th, .article-content table>tfoot>tr>td.active, .article-content table>tfoot>tr>th.active, .article-content table>thead>tr.active>td, .article-content table>thead>tr.active>th, .article-content table>thead>tr>td.active, .article-content table>thead>tr>th.active {
+    background-color: #f6f6f6;
+}
+.article-content table td {border: 1px solid #ddd}

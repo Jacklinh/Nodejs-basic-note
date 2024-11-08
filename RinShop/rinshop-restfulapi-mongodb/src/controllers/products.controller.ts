@@ -20,6 +20,15 @@ const findByID = async(req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 }
+const findAllByCate = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const {slug} = req.params;
+        const product = await productsService.findAllByCate(req.query,slug);
+        sendJsonSuccess(res,"success")(product);
+    }catch(error) {
+        next(error);
+    }
+}
 const findAllCategoryBySlug = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const {slug} = req.params;
@@ -34,6 +43,14 @@ const findOneBySlug = async(req: Request, res: Response, next: NextFunction) => 
         const {slug} = req.params;
         const product = await productsService.findOneBySlug(slug);
         sendJsonSuccess(res,"success")(product)
+    }catch(error) {
+        next(error);
+    }
+}
+const findByIsBest = async(req: Request, res: Response, next: NextFunction) => {
+    try {
+        const product = await productsService.findByIsBest(req.query);
+        sendJsonSuccess(res,"success")(product);
     }catch(error) {
         next(error);
     }
@@ -101,7 +118,9 @@ export default {
     findAll,
     findByID,
     findAllCategoryBySlug,
+    findAllByCate,
     findOneBySlug,
+    findByIsBest,
     createRecord,
     createDocument,
     updateByID,

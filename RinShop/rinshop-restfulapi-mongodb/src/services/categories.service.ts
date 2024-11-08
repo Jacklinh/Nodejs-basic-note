@@ -6,7 +6,7 @@ const findAll= async(query: any)=>{
     const page_str = query.page;
     const limit_str = query.limit;
     const page = page_str ? parseInt(page_str) : 1;
-    const limit = limit_str ? parseInt(limit_str) : 5;
+    const limit = limit_str ? parseInt(limit_str) : 999;
     const offset = (page - 1) * limit;
     // filter 
     let objectFilter: any = {};
@@ -46,6 +46,17 @@ const createRecord = async(payload: TypeCategory) => {
     const category = await Category.create(payload);
     return category;
 }
+// khi có up image
+const createDocument = async(body: any) => {
+    const payloads = {
+        category_name : body.category_name,
+        description: body.description,
+        slug: body.slug,
+        banner: body.banner, 
+    }
+    const category = await Category.create(payloads);
+    return category;
+}
 const updateByID = async(id: string, payload: TypeCategory) => {
     const category = await findByID(id);
     Object.assign(category,payload);
@@ -61,6 +72,7 @@ export default {
     findAll,
     findByID,
     createRecord,
+    createDocument,
     updateByID,
     deleteByID
 }
