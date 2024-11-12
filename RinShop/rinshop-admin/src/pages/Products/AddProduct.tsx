@@ -6,7 +6,7 @@ import { useNavigate,useSearchParams} from 'react-router-dom';
 import {Form,InputNumber,Input,Switch,message,Button, Select,Upload} from 'antd';
 import { CheckOutlined, CloseOutlined,UploadOutlined } from '@ant-design/icons';
 import type { FormProps,UploadProps,UploadFile,GetProp} from 'antd';
-import { TypeCategory } from '../../types/type';
+import { TypeCategory, ProductUnit } from '../../types/type';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 // ckeditor
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -60,6 +60,14 @@ import {
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
+interface ErrorResponse {
+	response?: {
+		data?: {
+			message?: string;
+			statusCode?: number;
+		};
+	};
+}
 const AddProduct = () => {
 	// start ckeditor
 	const editorRef = useRef(null);
@@ -68,7 +76,7 @@ const AddProduct = () => {
     
     const editorConfig: EditorConfig = {
         simpleUpload: {
-            uploadUrl: '',
+            uploadUrl: `${globalSetting.URL_API}/upload/photos`,
         },
             toolbar: {
                 items: [
@@ -225,12 +233,14 @@ const AddProduct = () => {
         origin?: string, 
         slug?: string,
         thumbnail?: string, 
+		gallery?: string,
         stock?: number, 
         isBest: boolean, 
         isNewProduct: boolean, 
         isShowHome: boolean,
         isActive: boolean ,
-        file?: UploadFile
+        file?: UploadFile,
+		files?: UploadFile[]
     }
 	// pagination
     const navigate = useNavigate();
@@ -239,7 +249,8 @@ const AddProduct = () => {
     const page = page_str ? page_str : 1;
 	const queryClient = useQueryClient();
 	const [formAdd] = Form.useForm();
-	const [fileList, setFileList] = useState<UploadFile[]>([]);
+	const [thumbnailList, setThumbnailList] = useState<UploadFile[]>([]);
+    const [galleryList, setGalleryList] = useState<UploadFile[]>([]);
 	const fetchCreateProduct = async (payload: FormData) => {
 		const url = `${globalSetting.URL_API}/products`;
 		const res = await axiosClient.post(url,payload,{
@@ -269,43 +280,71 @@ const AddProduct = () => {
             setTextEditor(createMutationProduct.data.description);
         }
     }, [createMutationProduct.isSuccess, createMutationProduct.data, formAdd]);
-	const onFinishAdd: FormProps<productDataType>['onFinish'] = (values: productDataType) => {
-		if (fileList.length === 0) {
-            message.error('Vui lòng chọn file trước khi thêm product.');
-            return;
-        }
-		const formData = new FormData();
-		// Lặp qua tất cả các trường trong values và thêm chúng vào formData
-		Object.entries(values).forEach(([key, value]) => {
-			formData.append(key,value);
-		});
-		fileList.forEach((file) => {
-            formData.append('file', file as FileType);
-        });
+	// finish form
+	const onFinishAdd: FormProps<productDataType>['onFinish'] = async (values: productDataType) => {
+		try {
+			if (thumbnailList.length === 0 ) {
+				message.error('Vui lòng chọn ảnh nổi bật trước khi thêm product.');
+				return;
+			}
+			const formData = new FormData();
+			console.log('Form values:', values);
+			// Lặp qua tất cả các trường trong values và thêm chúng vào formData
+			Object.entries(values).forEach(([key, value]) => {
+				formData.append(key,value);
+			});
+			if (thumbnailList[0]) {
+				formData.append('file', thumbnailList[0] as FileType);
+			}
+			if(galleryList.length > 0) {
+				galleryList.forEach((file) => {
+					if (file.originFileObj) {
+						formData.append('files', file.originFileObj);
+					}
+					// formData.append('files', file as FileType);
+				});
+			}
+			// Gọi mutation để tạo sản phẩm
+			await createMutationProduct.mutateAsync(formData);
+			navigate('/products');
+		}catch(error: ErrorResponse) {
+			message.error(error?.response?.data?.message || 'Có lỗi xảy ra khi thêm sản phẩm');
+		}
 		
-		// Gọi hàm mutate
-		createMutationProduct.mutate(formData);
 	}
 	const onFinishFailedAdd: FormProps<productDataType>['onFinishFailed'] = (errorInfo)=> {
 		console.log('Failed:', errorInfo);
 	}
 	const propsUploadAdd: UploadProps = {
 		onRemove: (file) => {
-			const index = fileList.indexOf(file);
-			const newFileList = fileList.slice();
+			const index = thumbnailList.indexOf(file);
+			const newFileList = thumbnailList.slice();
 			newFileList.splice(index, 1);
-			setFileList(newFileList);
+			setThumbnailList(newFileList);
 		},
 		beforeUpload: (file) => {
-		setFileList([file]);  // Chỉ chọn một file, nếu cần nhiều file thì sử dụng `setFileList([...fileList, file])`
-		return false;  // Tắt upload tự động
+			setThumbnailList([file]);  // Chỉ chọn một file, nếu cần nhiều file thì sử dụng `setFileList([...fileList, file])`
+			return false;  // Tắt upload tự động
 		},
-		fileList,
+		fileList: thumbnailList,
 	};
-	const handleOkAdd = () => {
-        formAdd.submit();
-        navigate('/products')
-    };
+	const propsUploadAddMultiple: UploadProps = {
+		name: 'files',
+		action: `${globalSetting.URL_API}/upload/photos`,
+		multiple: true,
+		onRemove: (file) => {
+			const index = galleryList.indexOf(file);
+			const newFileList = galleryList.slice();
+			newFileList.splice(index, 10);
+			setGalleryList(newFileList);
+		},
+		beforeUpload: (file) => {
+			setGalleryList([...galleryList, file]);  // Chỉ chọn một file, nếu cần nhiều file thì sử dụng `setFileList([...fileList, file])`
+			return false;  // Tắt upload tự động
+		},
+		fileList: galleryList,
+	};
+	
 	//============== get category ============= //
 	const fetchCategoryProduct = async() => {
 	const url = `${globalSetting.URL_API}/categories`;
@@ -343,14 +382,22 @@ const AddProduct = () => {
 						</Form.Item>
 					</div>
 				</div>
-				{/* <div className="form_edit_item">
+				<div className="form_edit_item">
 					<div className="form_edit_ttl">
 						<h3>Hình ảnh khác(nếu có)</h3>
 					</div>
 					<div className="form_edit_content">
-						<p>upload Gallery</p>
+						{/* <Form.Item<productDataType>
+							name="gallery"
+							label="Thư viện ảnh"
+						>
+							<Upload {...propsUploadAddMultiple}>
+								<Button icon={<UploadOutlined />}>Tải nhiều hình ảnh</Button>
+							</Upload>
+						</Form.Item> */}
+						
 					</div>
-				</div> */}
+				</div>
 				<div className="form_edit_item">
 					<div className="form_edit_ttl">
 						<h3>Thông tin sản phẩm</h3>
@@ -367,7 +414,7 @@ const AddProduct = () => {
 							<Input />
 						</Form.Item>
 						<Form.Item
-							label="Giá/Kg(VNĐ)"
+							label="Giá"
 							name="price"
 							>
 							<InputNumber 
@@ -399,9 +446,22 @@ const AddProduct = () => {
 							label="Xuất xứ sản phẩm"
 							name="origin"
 							>
-							<Input defaultValue='Đà Nẵng'
+							<Input 
 							/>
 						</Form.Item>
+						<Form.Item
+						label="Đơn vị tính"
+						name="unit"
+						initialValue={ProductUnit.KG}
+					>
+						<Select style={{ width: '100%' }}>
+							{Object.values(ProductUnit).map((unit) => (
+								<Select.Option key={unit} value={unit}>
+									{unit}
+								</Select.Option>
+							))}
+						</Select>
+					</Form.Item>
 					</div>
 				</div>
 				<div className="form_edit_item">
@@ -513,7 +573,6 @@ const AddProduct = () => {
 						type="primary"
 						htmlType="submit"
 						className='common_button'
-						onClick= {handleOkAdd}
 					>
 						Thêm mới
 					</Button>

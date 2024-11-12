@@ -28,9 +28,9 @@ const staffSchema = new Schema<TypeStaff>({
         minlength: 8
     },
     role: {
-        type: String,
-        enum: [EnumRole.Admin, EnumRole.SubAdmin, EnumRole.User, EnumRole.Viewer],
-        default: EnumRole.Viewer
+        type: String, 
+        enum: Object.values(EnumRole),
+        default: EnumRole.USER 
     },
     /* status  */
     active: {
@@ -53,5 +53,8 @@ const staffSchema = new Schema<TypeStaff>({
   
 //     next();
 //   });
+
+
+
 const Staff = model<TypeStaff>("Staff", staffSchema);
 export default Staff

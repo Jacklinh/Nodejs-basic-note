@@ -8,7 +8,7 @@ export type TypeStaff = {
     address: string,
     password: string;
     active?: boolean,
-    role?: string[];
+    role:  EnumRole;
 }
 
 export type TypeCategory = {
@@ -29,12 +29,13 @@ export type TypeProduct = {
     origin?: string, // nơi xuất xứ sản phẩm
     slug?: string,
     thumbnail?: string, // image sản phẩm
-    gallery?: string[], // images 
+    gallery?: string, // images 
     stock?: number, //Số lượng sản phẩm có trong kho
     isActive: boolean, // trạng thái hoạt động của sản phẩm
     isBest: boolean, /* SP bán nổi bật */
     isNewProduct: boolean, /* SP mới về */
     isShowHome: boolean, // sản phẩm có hiển thị trên trang chủ không.
+    unit?: ProductUnit, // đơn vị
 }
 export type TypeOderItems = {
     product: ObjectId,
@@ -46,7 +47,13 @@ export type TypeOderItems = {
 export type TypeOrder = {
     _id?: ObjectId,
     order_code?: string,// mã đơn hàng
-    customer?: string | ObjectId,
+    customer?: string | ObjectId | {
+        fullName: string,
+        email: string,
+        phone: string,
+        password: string,
+        address: string
+    },
     payment_type?: number,// loại thanh toán
     payment_status?: number,// trạng thái thanh toán
     status?: number,// trạng thái đơn hàng
@@ -63,18 +70,25 @@ export type TypeOrder = {
     updatedAt?: Date;
 }
 export type TypeCustomer = {
-    _id: ObjectId,
+    _id?: ObjectId,
     fullName: string,
     password: string,
     phone: string;
-    email: string;
+    email?: string;
     address: string,
     active?: boolean,
 }
 export enum EnumRole {
-    Admin = 'admin', // all quyền
-    SubAdmin = 'subAdmin', // quản lý sản phẩm, có quyền thêm, sửa, xoá, quản lý tồn kho
-    User = 'user', // người dùng có quyền thêm, sửa nhưng không có xoá
-    Viewer = 'viewer'// người dùng chỉ có quyền xem sản phẩm.
+    ADMIN = 'admin', // all quyền
+    USER = 'user', // người dùng có quyền thêm, sửa nhưng không có xoá
+    VIEWER = 'viewer'// người dùng chỉ có quyền xem sản phẩm.
+}
+// đơn vị sản phẩm
+export enum ProductUnit {
+    KG = 'kg',
+    GRAM = 'gram',
+    BUNCH = 'bó',
+    PACK = 'gói',
+    OTHER = 'khác'
 }
 

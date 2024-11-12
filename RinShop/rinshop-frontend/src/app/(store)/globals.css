@@ -246,7 +246,12 @@ body {
 	gap: 0 10px;
 }
 .cart_item .cart_image {
-	width: 10ppx;
+	width: 50px;
+}
+.cart_item .cart_info {
+	flex: 1;
+	display: flex;
+	gap: 0 10px;
 }
 .cart_item .cart_name {
 	color: var(--color_black);
@@ -462,19 +467,13 @@ body {
 	font-size: 0.8rem;
 	padding: 5px 0;
 }
-.form_order .payment_methods label {
+.form_order .ant-radio-wrapper {
 	background-color: var(--color_white);
-	padding: 20px 15px;
+	padding: 15px;
 	border-radius: 8px;
 	margin-bottom: 1em;
 	cursor: pointer;
-}
-.form_order .payment_methods input {
-	width: 20px;
-	height: 20px;
-	margin-right: 10px;
-	position: relative;
-	top: 4px;
+	width: 100%;
 }
 /* widget_filter */
 .widget_filter {

@@ -4,6 +4,7 @@ import Customer from '../models/customers.model';
 import { Request, Response, NextFunction } from "express";
 import createError from 'http-errors';
 import { globalConfig } from '../constants/configs';
+import { EnumRole } from '../types/models';
 
 interface decodedJWT extends JwtPayload {
     _id?: string
@@ -35,21 +36,43 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         return next(createError(403, 'Forbidden-authenticateToken'));
     }
 };
+// Hàm kiểm tra quyền
+const checkAuthorization = (roles_allowed: EnumRole[], current_role: string): boolean => {
+    // Chuyển đổi current_role thành enum
+    const currentRoleLower = current_role.toLowerCase();
+    const rolesAllowedLower = roles_allowed.map(role => role.toLowerCase());
+    
+    // Nếu là admin thì luôn cho phép
+    if (currentRoleLower === 'admin') {
+        return true;
+    }
+
+    // Nếu là user thì cho phép truy cập các quyền user và viewer
+    if (currentRoleLower === 'user') {
+        return rolesAllowedLower.includes('user') || rolesAllowedLower.includes('viewer');
+    }
+
+    // Các trường hợp khác
+    return rolesAllowedLower.includes(currentRoleLower);
+};
 // kiểm tra quyền truy cập dựa vào role
-export const authorizationAccess = (roles: string[] = []) => {
-    if(typeof roles === 'string'){
-        roles = [roles]
-    }
+export const authorizationAccess = (roles: EnumRole[] = []) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        const staffRole = res.locals.staff.role;
-        // kiêm tra nếu nhân viên k có quyền truy cập
-        if(roles.length && staffRole && !roles.includes(staffRole)) {
-            return next(createError(403,'Bạn không có quyền truy cập vào chức năng này'));
+        try {
+            if (!res.locals.staff) {
+                return next(createError(401, 'Unauthorized'));
+            }
+
+            const staffRole = res.locals.staff.role;
+            if (roles.length && !checkAuthorization(roles, staffRole)) {
+                return next(createError(403, 'Bạn không có quyền truy cập vào chức năng này'));
+            }
+            next();
+        } catch (error) {
+            next(error);
         }
-        // nếu quyền hợp lê thì cho phép truy cập
-        next()
-    }
-}
+    };
+};
 
 // xác thực tài khoản dành cho client
 export const authenticateTokenClient = async (req: Request, res: Response, next: NextFunction) => {

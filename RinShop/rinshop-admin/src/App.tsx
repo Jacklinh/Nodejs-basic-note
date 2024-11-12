@@ -15,6 +15,7 @@ import Staffs from "./pages/Staffs";
 import Categories from "./pages/Categories";
 import Customers from "./pages/Customers";
 import Orders from "./pages/Orders";
+import Profile from "./pages/Profile";
 const queryClient = new QueryClient();
 function App() {
 
@@ -33,8 +34,10 @@ function App() {
                     <Route path="staffs" element={<Staffs />} />
                     <Route path="customers" element={<Customers />} />
                     <Route path="orders" element={<Orders />} />
+                    <Route path="/profile" element={<Profile />} />
                 </Route>
                 <Route path="/login" element={<LoginPage />} />
+                
                 <Route path="*" element={<NoPage />} />
             </Routes>
       </BrowserRouter>

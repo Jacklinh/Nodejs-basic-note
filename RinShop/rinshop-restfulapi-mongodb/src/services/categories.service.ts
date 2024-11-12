@@ -10,23 +10,25 @@ const findAll= async(query: any)=>{
     const offset = (page - 1) * limit;
     // filter 
     let objectFilter: any = {};
-    if(query.categoryName && query.categoryName !== ''){
-        objectFilter = {...objectFilter, category_name: new RegExp(query.categoryName,'i')}
+    if(query.keyword && query.keyword !== '') {
+        const regex = new RegExp(query.keyword, 'i');
+        objectFilter = {
+            ...objectFilter,
+            $or: [
+                { category_name: { $regex: regex } },
+            ]
+        };
     }
     // find select * FROM categories
     const categories = await Category
-    .find({
-        ...objectFilter
-    })
+    .find(objectFilter)
     .select('-__v')
     .skip(offset)
     .limit(limit);
-    const totalRecords = await Category.countDocuments({
-        ...objectFilter
-    });
+    const totalRecords = await Category.countDocuments(objectFilter);
     return {
         categories_list: categories,
-        filters: categories,
+        filters: objectFilter,
         pagination: {
             page,
             limit,

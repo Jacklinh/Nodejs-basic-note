@@ -18,8 +18,8 @@ const UserInfo = () => {
                     <span className={styles.user_email}>{user?.email}</span>
                 </p>
             </div>
-            <Button className={styles.user_profile}><UserOutlined /> Profile</Button>
-            <Button className={styles.user_logout} onClick={logout}><LogoutOutlined /> Logout</Button>
+            <Button className={styles.user_profile}><UserOutlined /><Link to={"/profile"}>Quản lý tài khoản</Link></Button>
+            <Button className={styles.user_logout} onClick={logout}><LogoutOutlined /> Đăng xuất</Button>
         </div>
     );
     return (
@@ -41,7 +41,7 @@ const UserInfo = () => {
                 ): (
                     <Space wrap size={16}>
                         <Link to={"/login"}>
-                            Login
+                            Đăng nhập
                         </Link>
                     </Space>
                 )

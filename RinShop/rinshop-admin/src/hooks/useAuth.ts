@@ -9,7 +9,7 @@ interface User {
   phone: string;
   password: string;
   email: string,
-  role: string;
+  role: string[];
 }
 interface AuthState {
   user: User | null;

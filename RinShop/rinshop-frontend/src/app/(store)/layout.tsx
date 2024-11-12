@@ -4,9 +4,6 @@ import "./globals.css";
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react';
 import LoadingSpinner from "@/components/ui/common/Loading";
-const Cart = dynamic(() => import('@/components/ui/common/Cart'), {
-  loading: () => <p>Loading...</p>
-})
 const Header = dynamic(() => import('@/components/ui/layouts/Header'), {
   loading: () => <p>Loading...</p>
 })
@@ -43,7 +40,6 @@ export default function RootLayout({
         <main>
           {children}
         </main>
-        <Cart />
       </body>
     </html>
   );

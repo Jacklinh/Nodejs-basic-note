@@ -14,17 +14,28 @@ const findAll = async (query: any) => {
     /* Sắp xếp */
     let objSort: any = {};
     const sortBy = query.sort || 'updateAt'; // Mặc định sắp xếp theo ngày tạo giảm dần
-    const idBy = query._id && query._id == 'ASC' ? 1: -1;
-    const nameBy = query.last_name && query.last_name == 'ASC' ? -1: 1;
-    objSort = {...objSort, [sortBy]: idBy,nameBy} // Thêm phần tử sắp xếp động vào object {}
+    const orderBy = query.order && query.order == 'ASC' ? -1: 1;
+    objSort = {...objSort, [sortBy]: orderBy} // Thêm phần tử sắp xếp động vào object {}
     /* search theo tên */
     let objectFilter: any = {};
     if(query.keyword && query.keyword !== '') {
-        const regex = new RegExp(query.keyword, 'i');
-        objectFilter = {...objectFilter,$or: [
-            { fullName: {$regex: regex} },
-            { email: {$regex: regex} }
-        ]}
+        const keyword = query.keyword;
+        const customerMatch = await Customer.find({
+            $or: [
+                { fullName: { $regex: keyword, $options: 'i' } },
+                { email: { $regex: keyword, $options: 'i' } },
+                { phone: { $regex: keyword, $options: 'i' } }
+            ]
+        }).select('_id');
+
+        const customerIds = customerMatch.map(customer => customer._id);
+
+        objectFilter = {
+            $or: [
+                { order_code: { $regex: keyword, $options: 'i' } },
+                { customer: { $in: customerIds } }
+            ]
+        };
     }
     // Filter theo trạng thái đơn hàng
     if(query.status) {
@@ -69,7 +80,7 @@ const findAll = async (query: any) => {
     .select('-__v')
     .populate({
         path: 'customer',
-        select: 'fullName email phone address'
+        select: 'fullName email phone address',
     })
     .populate({
         path: 'order_items.product',  // Thêm populate cho product trong order_items
@@ -77,6 +88,8 @@ const findAll = async (query: any) => {
     })
     .skip(offset)
     .limit(limit);
+    // Lọc lại các đơn hàng có customer match với keyword
+    const filteredOrders = orders.filter(order => order.customer !== null);
     // Transform data để thêm product_name vào order_items
     const transformedOrders = orders.map(order => {
         const orderObj = order.toObject();
@@ -86,16 +99,17 @@ const findAll = async (query: any) => {
         }));
         return orderObj;
     });
-    //Đếm tổng số record hiện có của collection
+    /* Đếm tổng số record */
     const totalRecords = await Order.countDocuments(objectFilter);
+
     return {
         orders_list: transformedOrders,
         sorts: objSort,
-        // Phân trang
+        filters: objectFilter,
         pagination: {
             page,
             limit,
-            totalPages: Math.ceil(totalRecords / limit), //tổng số trang
+            totalPages: Math.ceil(totalRecords / limit),
             totalRecords
         }
     }
@@ -118,7 +132,24 @@ Logic tạo đơn hàng
 const createRecord = async (payload: TypeOrder, customerLogined: any) => {
     try {
         let customerId;
+        // Thêm type guard để kiểm tra customer object
+        interface CustomerObject {
+            fullName: string;
+            email: string;
+            phone: string;
+            password: string;
+            address: string;
+        }
 
+        const isCustomerObject = (customer: any): customer is CustomerObject => {
+            return customer 
+                && typeof customer === 'object'
+                && 'email' in customer
+                && 'fullName' in customer
+                && 'phone' in customer
+                && 'password' in customer
+                && 'address' in customer;
+        };
         // Xử lý customer
         if (customerLogined) {
             // Nếu có customer đã đăng nhập, sử dụng ID của họ
@@ -126,10 +157,10 @@ const createRecord = async (payload: TypeOrder, customerLogined: any) => {
         } else if (typeof payload.customer === 'string') {
             // Nếu customer là string (ID), sử dụng trực tiếp
             customerId = payload.customer;
-        } else if (typeof payload.customer === 'object') {
+        } else if (payload.customer && isCustomerObject(payload.customer)) {
             // Nếu là customer mới, kiểm tra email tồn tại
             const existingCustomer = await Customer.findOne({ 
-                email: payload?.customer.email
+                email: payload.customer.email
             });
 
             if (existingCustomer) {

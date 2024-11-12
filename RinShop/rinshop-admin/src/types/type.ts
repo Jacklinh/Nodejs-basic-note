@@ -8,21 +8,23 @@ export type TypeCategory = {
     banner?: string
 }
 export type TypeProduct = {
-    _id: string,
-    product_name: string,
-    price: number,
-    discount: number,// Giảm giá cho sản phẩm (nếu có), có thể là tỷ lệ phần trăm hoặc số tiền.
-    category: TypeCategory,
-    description?: string,
-    origin?: string, // nơi xuất xứ sản phẩm
-    slug?: string,
-    thumbnail?: string, // images sản phẩm
-    gallery?: string[],
-    stock?: number, //Số lượng sản phẩm có trong kho
-    isActive: boolean, // trạng thái hoạt động của sản phẩm
-    isBest: boolean, /* SP bán nổi bật */
-    isNewProduct: boolean, /* SP mới về */
-    isShowHome: boolean, // sản phẩm có hiển thị trên trang chủ không.
+    _id?: string;
+    product_name: string;
+    price: number;
+    discount?: number;
+    stock?: number;
+    category?: string;
+    description?: string;
+    origin?: string;
+    thumbnail?: string;
+    gallery?: string;  // Đảm bảo gallery là mảng string
+    isBest?: boolean;
+    isNewProduct?: boolean;
+    isShowHome?: boolean;
+    isActive?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+    unit?: ProductUnit, // đơn vị
 }
 export type TypeStaff = {
     _id: string,
@@ -31,7 +33,9 @@ export type TypeStaff = {
     email: string,
     password: string,
     active: boolean,
-    role?: string[]
+    role: EnumRole,
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 export type TypeCustomer = {
     _id: string,
@@ -77,4 +81,17 @@ export type TypeOrder = {
     delivered_at?: Date,// thời gian giao hàng
     createdAt: Date | string ;
     updatedAt?: Date | string;
+}
+export enum EnumRole {
+    ADMIN = 'admin',     // Full quyền (xem, thêm, sửa, xóa)
+    USER = 'user',       // Quyền hạn chế (xem, thêm, sửa)
+    VIEWER = 'viewer'    // Chỉ xem
+}
+// đơn vị sản phẩm
+export enum ProductUnit {
+    KG = 'kg',
+    GRAM = 'gram',
+    BUNCH = 'bó',
+    PACK = 'gói',
+    OTHER = 'khác'
 }

@@ -8,6 +8,7 @@ import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { useEffect, useState } from "react";
 import './ckeditor_article.css';
+import Cart from "@/components/ui/common/Cart";
 export default function Page({params}:{params: {slug: string}}) {
     const slug = params.slug;
     const [productDetail,setProductDetail] = useState<TypeProduct | null>(null);
@@ -111,9 +112,11 @@ export default function Page({params}:{params: {slug: string}}) {
                                                                     p.discount > 0 ? 
                                                                     (
                                                                         <>
-                                                                            <span className='product_discount'>{p.discount} %</span>
-                                                                            <del>{p.price} VNĐ</del>
-                                                                            <span className='price_new'>{(p.price - (p.price * p.discount / 100)).toLocaleString('vi-VN')} VNĐ</span>
+                                                                            <span className="product_discount">{p.discount} %</span>
+                                                                            <del>{new Intl.NumberFormat('vi-VN',{style: 'currency',currency: 'VND'}).format(p.price)}</del>
+                                                                            <span className="price_new">
+                                                                                {new Intl.NumberFormat('vi-VN',{style: 'currency',currency: 'VND'}).format(p.price - (p.price * p.discount / 100))}
+                                                                            </span>
                                                                         </>
                                                                     ): 
                                                                     (
@@ -144,7 +147,7 @@ export default function Page({params}:{params: {slug: string}}) {
                         </div>
                     </div>
                 </section>
-                
+                <Cart />
             </>
             
            

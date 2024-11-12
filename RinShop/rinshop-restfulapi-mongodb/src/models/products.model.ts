@@ -1,6 +1,6 @@
 import {Schema, model } from "mongoose";
 import { buildSlug } from "../helpers/buildSlug";
-import { TypeProduct } from "../types/models";
+import { TypeProduct, ProductUnit } from "../types/models";
 import createError from "http-errors";
 const productSchema = new Schema<TypeProduct>({
     product_name: {
@@ -50,8 +50,7 @@ const productSchema = new Schema<TypeProduct>({
     // các ảnh khác
     gallery: {
         type: String,
-        maxlength: 255,
-        require: false,
+        required: false
     },
     // số lượng sản phẩm tồn kho
     stock: {
@@ -83,6 +82,13 @@ const productSchema = new Schema<TypeProduct>({
         type: Boolean,
         require: false,
         default: false
+    },
+    // đơn vị
+    unit: {
+        type: String,
+        enum: Object.values(ProductUnit),
+        require: false, 
+        default: ProductUnit.KG
     },
 },{
     timestamps: true

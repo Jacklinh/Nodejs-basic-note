@@ -1,32 +1,35 @@
 import { useState, useEffect } from 'react';
-import { Table, Pagination, Input, Button, Space, message, Popconfirm, Modal, Form, Image, Select, InputNumber, Tag } from 'antd';
+import { Table, Pagination, Input, Button, Space, message, Popconfirm, Modal, Form, Image, Select, InputNumber, Tag, Flex, Radio, DatePicker } from 'antd';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import { FaRegEye } from "react-icons/fa";
-import type { TableProps, FormProps } from 'antd';
-import { TypeOrder,TypeOrderItem } from '../../types/type';
+import type { TableProps, FormProps, RadioChangeEvent } from 'antd';
+import { TypeOrder, TypeOrderItem, EnumRole } from '../../types/type';
 import noImage from '../../assets/noImage.jpg'
-
+import useAuth from '../../hooks/useAuth';
 const { TextArea } = Input;
-
+const { RangePicker } = DatePicker;
 const Orders = () => {
     // Options cho phương thức thanh toán
     const paymentTypeOptions = [
+        { value: '', label: 'Tất cả' },
         { value: 1, label: 'Thanh toán khi nhận hàng ' },
         { value: 2, label: 'Chuyển khoản ngân hàng' },
         { value: 3, label: 'Thanh toán qua ví điện tử' },
     ];
     // Options cho trạng thái thanh toán
     const paymentStatusOptions = [
+        { value: '', label: 'Tất cả' },
         { value: 1, label: 'Chưa thanh toán' },
         { value: 2, label: 'Đã thanh toán' },
         { value: 3, label: 'Hoàn tiền' }
     ];
     // Options cho trạng thái đơn hàng
     const orderStatusOptions = [
+        { value: '', label: 'Tất cả' },
         { value: 1, label: 'Chờ xác nhận' },
         { value: 2, label: 'Đã xác nhận' },
         { value: 3, label: 'Đang giao hàng' },
@@ -35,21 +38,90 @@ const Orders = () => {
         { value: 6, label: 'Hoàn trả' }
     ];
     //============== start fetch all order ============= //
+    const [formUpdate] = Form.useForm<TypeOrder>();
     const navigate = useNavigate();
     const [params] = useSearchParams();
     const limit = 5;
     const page_str = params.get('page');
     const page = page_str ? parseInt(page_str) : 1;
+    // sort for fullName
+    const [sortOrder, setSortOrder] = useState<string>("ASC");
+    // search keyword
+    const keyword_str = params.get('keyword');
+    const keyword = keyword_str ? keyword_str : null;
+    // filter payment_type, payment_status, status
+    const [filters, setFilters] = useState({
+        payment_type: null,
+        payment_status: null,
+        status: null,
+        start_date: null,
+        end_date: null
+    });
+    // Hàm xử lý chung cho tất cả filter
+    const handleFilter = (type: 'payment_type' | 'payment_status' | 'status', value: number | null) => {
+        setFilters(prev => ({ ...prev, [type]: value }));
+
+        const searchParams = new URLSearchParams(params);
+        if (value) {
+            searchParams.set(type, value.toString());
+        } else {
+            searchParams.delete(type);
+        }
+        searchParams.delete('page'); // Reset page về 1
+        navigate(`/orders?${searchParams.toString()}`);
+    };
+    // hàm xử lý filter khoảng thời gian đặt đơn hàng 
+    const handleDateRangeChange = (dates: any | null) => {
+        if (dates) {
+            const [start, end] = dates;
+            setFilters(prev => ({
+                ...prev,
+                start_date: start.format('YYYY-MM-DD'),
+                end_date: end.format('YYYY-MM-DD')
+            }));
+
+            const searchParams = new URLSearchParams(params);
+            searchParams.set('start_date', start.format('YYYY-MM-DD'));
+            searchParams.set('end_date', end.format('YYYY-MM-DD'));
+            searchParams.delete('page'); // Reset page về 1
+            navigate(`/orders?${searchParams.toString()}`);
+        } else {
+            setFilters(prev => ({
+                ...prev,
+                start_date: null,
+                end_date: null
+            }));
+
+            const searchParams = new URLSearchParams(params);
+            searchParams.delete('start_date');
+            searchParams.delete('end_date');
+            searchParams.delete('page');
+            navigate(`/orders?${searchParams.toString()}`);
+        }
+    };
     const fetchOrder = async () => {
         let url = `${globalSetting.URL_API}/orders?`;
-        url += `page=${page_str}&limit=${limit}`;
+        if (keyword) {
+            url += `keyword=${keyword}&`;
+        }
+        // filter payment_type, payment_status, status
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null) {
+                url += `${key}=${value}&`;
+            }
+        });
+        url += `page=${page_str}&limit=${limit}&sort=createdAt&order=${sortOrder}`;
         const res = await axiosClient.get(url)
         return res.data.data
     }
     const getOrder = useQuery({
-        queryKey: ['orders', page],
+        queryKey: ['orders', page, keyword, sortOrder, filters],
         queryFn: fetchOrder
     });
+    // handleSortChange
+    const handleSortChange = (e: RadioChangeEvent) => {
+        setSortOrder(e.target.value);
+    };
     //============== order details ============= //
     const [isModalDetailOpen, setIsModalDetailOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<TypeOrder | null>(null);
@@ -66,8 +138,7 @@ const Orders = () => {
     const [editingOrder, setEditingOrder] = useState<TypeOrder | null>(null);
     const [isModalEditOpen, setIsModalEditOpen] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
-	const [shippingFee, setShippingFee] = useState<number>(0);
-    const [formUpdate] = Form.useForm();
+    const [shippingFee, setShippingFee] = useState<number>(0);
     const queryClient = useQueryClient();
     const fetchUpdateOrder = async (payload: TypeOrder) => {
         const { _id, ...params } = payload;
@@ -91,15 +162,15 @@ const Orders = () => {
             message.error('Cập nhật lỗi!');
         }
     });
-	// Tính toán tổng tiền từ order items
+    // Tính toán tổng tiền từ order items
     const calculateSubTotal = (items: TypeOrderItem[]) => {
         return items.reduce((sum, item) => {
             const itemTotal = item.price * item.quantity * (1 - item.discount / 100);
             return sum + itemTotal;
         }, 0);
     };
-     // Effect để tính toán tổng tiền
-	 useEffect(() => {
+    // Effect để tính toán tổng tiền
+    useEffect(() => {
         if (editingOrder) {
             const subTotal = calculateSubTotal(editingOrder.order_items);
             setTotalAmount(subTotal + shippingFee);
@@ -109,11 +180,11 @@ const Orders = () => {
     const showModalEdit = (record: TypeOrder) => {
         setIsModalEditOpen(true);
         setEditingOrder(record);
-		setShippingFee(record.shipping_fee);
+        setShippingFee(record.shipping_fee);
         formUpdate.setFieldsValue({
             ...record,
             order_items: record.order_items,
-			shipping_fee: record.shipping_fee
+            shipping_fee: record.shipping_fee
         });
     };
 
@@ -124,7 +195,7 @@ const Orders = () => {
     const handleCancelEdit = () => {
         setIsModalEditOpen(false);
     };
-	// Xử lý khi thay đổi trạng thái đơn hàng
+    // Xử lý khi thay đổi trạng thái đơn hàng
     const handleStatusChange = (value: number) => {
         if (value === 5) {
             Modal.confirm({
@@ -152,7 +223,7 @@ const Orders = () => {
             formUpdate.setFieldsValue({ status: value });
         }
     };
-	// Xử lý khi thay đổi số lượng
+    // Xử lý khi thay đổi số lượng
     const handleQuantityChange = (value: number | null, index: number) => {
         if (editingOrder) {
             const newItems = [...editingOrder.order_items];
@@ -182,11 +253,11 @@ const Orders = () => {
             _id: editingOrder._id,
             customer: {
                 _id: editingOrder.customer._id,
-				fullName: editingOrder.customer.fullName,
-				email: editingOrder.customer.email,
-				phone: editingOrder.customer.phone,
-				password: editingOrder.customer.password,
-				address: editingOrder.customer.address
+                fullName: editingOrder.customer.fullName,
+                email: editingOrder.customer.email,
+                phone: editingOrder.customer.phone,
+                password: editingOrder.customer.password,
+                address: editingOrder.customer.address
             },
             order_items: editingOrder.order_items.map(item => ({
                 product: {
@@ -208,10 +279,10 @@ const Orders = () => {
             cancelled_reason: values.cancelled_reason,
             cancelled_at: values.cancelled_at,
             total_amount: totalAmount,
-			createdAt: new Date()
+            createdAt: new Date()
         };
         updateMutationOrder.mutate(updatedOrder);
-       
+
     };
     //============== order delete ============= //
     const fetchDeleteOrder = async (id: string) => {
@@ -231,36 +302,65 @@ const Orders = () => {
             message.error('Xoá lỗi !');
         },
     });
+    //============== search order  ============= //
+    const [formSearch] = Form.useForm();
+    const [clientReadySearch, setClientReadySearch] = useState(false);
+    const onFinishSearch: FormProps<TypeOrder>['onFinish'] = (values) => {
+        // cập nhập lại url
+        const params = new URLSearchParams();
+        // duyệt qua từng cặp key -value trong object
+        for (const [key, value] of Object.entries(values)) {
+            if (value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        }
+        const searchString = params.toString();
+        navigate(`/orders?${searchString}`);
+    }
+    const onFinishFailedSearch: FormProps<TypeOrder>['onFinishFailed'] = (errorInfo) => {
+        console.log('Failed:', errorInfo);
+    }
+    const handleInputChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setClientReadySearch(value.length > 0); // Hiện nút khi có giá trị
+        // Điều hướng đến /staffs nếu input rỗng
+        if (value.length === 0) {
+            navigate(`/orders`);
+        }
+    };
+    // phân quyền, lấy user từ hook useAuth
+    const { user } = useAuth();
     // render get all orders
     const columns: TableProps<TypeOrder>['columns'] = [
         {
             title: 'Mã đơn hàng',
             dataIndex: 'order_code',
             key: 'order_code',
-            width: 200,
         },
         {
             title: 'Khách Hàng',
             dataIndex: ['customer', 'fullName'],
+            width: 350,
             key: 'customer',
-            width: 200,
         },
         {
             title: 'Email',
             dataIndex: ['customer', 'email'],
             key: 'email',
-            width: 200,
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: ['customer', 'phone'],
+            key: 'phone',
         },
         {
             title: 'Số Lượng',
             key: 'totalItems',
-            width: 100,
             render: (_, record) => record.order_items.length
         },
         {
             title: 'Tổng Tiền',
             key: 'total',
-            width: 150,
             render: (_, record) => {
                 const total = record.total_amount || 0;
                 return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
@@ -270,7 +370,6 @@ const Orders = () => {
             title: 'Phương thức thanh toán',
             dataIndex: 'payment_type',
             key: 'payment_type',
-            width: 150,
             render: (status) => {
                 const statusText = paymentTypeOptions.find(s => s.value === status)?.label;
                 return <Tag color={status === 2 ? 'green' : status === 3 ? 'red' : 'orange'}>{statusText}</Tag>;
@@ -280,7 +379,6 @@ const Orders = () => {
             title: 'Trạng thái thanh toán',
             dataIndex: 'payment_status',
             key: 'payment_status',
-            width: 150,
             render: (status) => {
                 const statusText = paymentStatusOptions.find(s => s.value === status)?.label;
                 return <Tag color={status === 2 ? 'green' : status === 3 ? 'red' : 'orange'}>{statusText}</Tag>;
@@ -290,28 +388,30 @@ const Orders = () => {
             title: 'Trạng thái đơn hàng',
             dataIndex: 'status',
             key: 'status',
-            width: 150,
             render: (status) => {
                 const statusText = orderStatusOptions.find(s => s.value === status)?.label;
                 const color = status === 4 ? 'green' :
                     status === 5 ? 'red' :
-                        status === 3 ? 'blue' : 'orange';
+                        status === 3 ? 'blue' : status === 2 ? 'green' : 'orange';
                 return <Tag color={color}>{statusText}</Tag>;
             }
         },
         {
             title: 'Ngày Đặt',
             key: 'createdAt',
-            width: 150,
+            fixed: 'right',
             render: (_, record) => {
                 const date = record.createdAt ? new Date(record.createdAt) : new Date();
                 return <span>{date.toLocaleDateString('vi-VN')}</span>;
-			}
-        },
-        {
-            title: 'Hành động',
+            }
+        }
+    ];
+    if (user?.role.includes(EnumRole.ADMIN) || user?.role.includes(EnumRole.USER) || user?.role.includes(EnumRole.VIEWER)) {
+        columns.push({
+            title: 'Hành Động',
             key: 'action',
-            width: 150,
+            fixed: "right",
+            width: 200,
             render: (_, record) => (
                 <Space size="middle">
                     <Button
@@ -321,52 +421,189 @@ const Orders = () => {
                         icon={<FaRegEye />}
                         onClick={() => showModalDetail(record)}
                     />
-                    <Button
-                        type="primary"
-                        shape="circle"
-                        className='common_button'
-                        icon={<AiOutlineEdit />}
-                        onClick={() => showModalEdit(record)}
-                    />
-                    <Popconfirm
-                        title="Xoá đơn hàng"
-                        description="Bạn có chắc chắn muốn xoá đơn hàng này?"
-                        onConfirm={() => deleteOrder.mutate(record._id)}
-                        okText="Đồng ý"
-                        cancelText="Hủy"
-                    >
+                    {user?.role.includes(EnumRole.USER) && (
                         <Button
                             type="primary"
                             shape="circle"
-                            icon={<AiOutlineDelete />}
-                            danger
+                            className='common_button'
+                            icon={<AiOutlineEdit />}
+                            onClick={() => showModalEdit(record)}
                         />
-                    </Popconfirm>
+                    )}
+                    {/* admin có quyền xoá */}
+                    {user?.role.includes(EnumRole.ADMIN) && (
+                        <Popconfirm
+                            title="Xoá đơn hàng"
+                            description="Bạn có chắc chắn muốn xoá đơn hàng này?"
+                            onConfirm={() => deleteOrder.mutate(record._id)}
+                            okText="Đồng ý"
+                            cancelText="Hủy"
+                        >
+                            <Button
+                                type="primary"
+                                shape="circle"
+                                icon={<AiOutlineDelete />}
+                                danger
+                            />
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
-        }
-    ];
-
+        })
+    }
     return (
         <>
             {/*  get all orders */}
-            <Table
-                dataSource={getOrder?.data?.orders_list}
-                columns={columns}
-                rowKey={(record) => record._id}
-                pagination={false}
-            />
+            <div className="box_heading">
+                <h2>DANH SÁCH ĐƠN HÀNG</h2>
+                <Form
+                    form={formSearch} 
+                    name="form_search_order"
+                    onFinish={onFinishSearch}
+                    onFinishFailed={onFinishFailedSearch}
+                    autoComplete="on"
+                    layout="inline"
+                    className='form_search'
+                >
+                    <Form.Item
+                        name="keyword"
+                    >
+                        <Input
+                            onChange={handleInputChangeSearch}
+                            placeholder="Tìm kiếm theo tên, email, số điện thoại hoặc mã đơn hàng"
+                        />
+                    </Form.Item>
 
-            <Pagination
-                className='pagination_page'
-                defaultCurrent={1}
-                current={page}
-                pageSize={getOrder?.data?.pagination.limit || 5}
-                total={getOrder?.data?.pagination.totalRecords || 0}
-                onChange={(page) => {
-                    navigate(page !== 1 ? `/orders?page=${page}` : '/orders');
-                }}
-            />
+                    <Form.Item shouldUpdate>
+                        <Space>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                disabled={
+                                    !clientReadySearch ||
+                                    !formSearch.isFieldsTouched(true) ||
+                                    !formSearch.getFieldValue('keyword')
+                                }
+                            >
+                                Tìm kiếm
+                            </Button>
+                            <Button
+                                type="default"
+                                htmlType="reset"
+                                onClick={() => {
+                                    formSearch.resetFields();
+                                    setClientReadySearch(false);
+                                    navigate('/orders');
+                                }}
+                            >
+                                Reset
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </div>
+            <Flex gap={20} align='center' className='box_filter'>
+                <Space direction="vertical" size="middle">
+                    <Flex gap={10} align='center'>
+                        <Space size="middle">
+                            <div className='filter_item'>
+                                <span style={{ marginRight: '8px', fontWeight: 'bold' }}>Sắp xếp đơn hàng: </span>
+                                <Radio.Group onChange={handleSortChange} value={sortOrder}>
+                                    <Space direction="horizontal">
+                                        <Radio.Button value="ASC">Mới nhất</Radio.Button>
+                                        <Radio.Button value="DESC">Cũ</Radio.Button>
+                                    </Space>
+                                </Radio.Group>
+                            </div>
+                            <div className='filter_item'>
+                                <span style={{ marginRight: '8px', fontWeight: 'bold' }}>Thời gian đặt hàng:</span>
+                                <RangePicker
+                                    onChange={handleDateRangeChange}
+                                    format="DD/MM/YYYY"
+                                    placeholder={['Từ ngày', 'Đến ngày']}
+                                    style={{ width: 300 }}
+                                />
+                            </div>
+                        </Space>
+                    </Flex>
+                    {/* Filter option */}
+                    <Flex gap={10} align='center'>
+                        <Space size="middle">
+                            {/* Filter phương thức thanh toán */}
+                            <div className='filter_item'>
+                                <span style={{ marginRight: '8px', fontWeight: 'bold' }}>Phương thức thanh toán:</span>
+                                <Select
+                                    style={{ width: 200 }}
+                                    value={filters.payment_type}
+                                    onChange={(value) => handleFilter('payment_type', value)}
+                                    defaultValue={null}
+                                >
+                                    {paymentTypeOptions.map(option => (
+                                        <Select.Option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </div>
+
+                            {/* Filter trạng thái thanh toán */}
+                            <div className='filter_item'>
+                                <span style={{ marginRight: '8px', fontWeight: 'bold' }}>Trạng thái thanh toán:</span>
+                                <Select
+                                    style={{ width: 200 }}
+                                    value={filters.payment_status}
+                                    onChange={(value) => handleFilter('payment_status', value)}
+                                    defaultValue={null}
+                                >
+                                    {paymentStatusOptions.map(option => (
+                                        <Select.Option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </div>
+
+                            {/* Filter trạng thái đơn hàng */}
+                            <div className='filter_item'>
+                                <span style={{ marginRight: '8px', fontWeight: 'bold' }}>Trạng thái đơn hàng:</span>
+                                <Select
+                                    style={{ width: 200 }}
+                                    value={filters.status}
+                                    onChange={(value) => handleFilter('status', value)}
+                                    defaultValue={null}
+                                >
+                                    {orderStatusOptions.map(option => (
+                                        <Select.Option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </div>
+                        </Space>
+                    </Flex>
+                </Space>
+
+            </Flex>
+            <div className="data_table">
+                <Table
+                    dataSource={getOrder?.data?.orders_list}
+                    columns={columns}
+                    rowKey={(record) => record._id}
+                    pagination={false}
+                />
+
+                <Pagination
+                    className='pagination_page'
+                    defaultCurrent={1}
+                    current={page}
+                    align='center'
+                    pageSize={getOrder?.data?.pagination.limit || 5}
+                    total={getOrder?.data?.pagination.totalRecords || 0}
+                    onChange={(page) => {
+                        navigate(page !== 1 ? `/orders?page=${page}` : '/orders');
+                    }}
+                />
+            </div>
             {/* Modal Chi tiết đơn hàng */}
             <Modal
                 title="CHI TIẾT ĐƠN HÀNG"
@@ -378,7 +615,7 @@ const Orders = () => {
                 {selectedOrder && (
                     <div className='box_order_detail'>
                         <Table
-                        dataSource={[
+                            dataSource={[
                                 {
                                     label: 'Tên khách Hàng',
                                     value: selectedOrder.customer.fullName
@@ -485,54 +722,54 @@ const Orders = () => {
                                     }
                                 }
                             ]}
-							summary={() => (
-								<>
-									<Table.Summary.Row>
-										<Table.Summary.Cell index={0} colSpan={5} align="right">
-											<strong>Tạm tính:</strong>
-										</Table.Summary.Cell>
-										<Table.Summary.Cell index={1}>
-											<strong>
-												{new Intl.NumberFormat('vi-VN', {
-													style: 'currency',
-													currency: 'VND'
-												}).format(selectedOrder.total_amount - selectedOrder.shipping_fee)}
-											</strong>
-										</Table.Summary.Cell>
-									</Table.Summary.Row>
-									<Table.Summary.Row>
-										<Table.Summary.Cell index={0} colSpan={5} align="right">
-											<strong>Phí vận chuyển:</strong>
-										</Table.Summary.Cell>
-										<Table.Summary.Cell index={1}>
-											<strong>
-												{new Intl.NumberFormat('vi-VN', {
-													style: 'currency',
-													currency: 'VND'
-												}).format(selectedOrder.shipping_fee)}
-											</strong>
-										</Table.Summary.Cell>
-									</Table.Summary.Row>
-									<Table.Summary.Row>
-										<Table.Summary.Cell index={0} colSpan={5} align="right">
-											<strong>Tổng cộng:</strong>
-										</Table.Summary.Cell>
-										<Table.Summary.Cell index={1}>
-											<strong>
-												{new Intl.NumberFormat('vi-VN', {
-													style: 'currency',
-													currency: 'VND'
-												}).format(selectedOrder.total_amount)}
-											</strong>
-										</Table.Summary.Cell>
-									</Table.Summary.Row>
-								</>
-							)}
+                            summary={() => (
+                                <>
+                                    <Table.Summary.Row>
+                                        <Table.Summary.Cell index={0} colSpan={5} align="right">
+                                            <strong>Tạm tính:</strong>
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1}>
+                                            <strong>
+                                                {new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND'
+                                                }).format(selectedOrder.total_amount - selectedOrder.shipping_fee)}
+                                            </strong>
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                    <Table.Summary.Row>
+                                        <Table.Summary.Cell index={0} colSpan={5} align="right">
+                                            <strong>Phí vận chuyển:</strong>
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1}>
+                                            <strong>
+                                                {new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND'
+                                                }).format(selectedOrder.shipping_fee)}
+                                            </strong>
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                    <Table.Summary.Row>
+                                        <Table.Summary.Cell index={0} colSpan={5} align="right">
+                                            <strong>Tổng cộng:</strong>
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1}>
+                                            <strong>
+                                                {new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND'
+                                                }).format(selectedOrder.total_amount)}
+                                            </strong>
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </>
+                            )}
                         />
                     </div>
                 )}
             </Modal>
-			{/* Modal Cập nhật đơn hàng */}
+            {/* Modal Cập nhật đơn hàng */}
             <Modal
                 title="CẬP NHẬT ĐƠN HÀNG"
                 open={isModalEditOpen}
@@ -544,7 +781,7 @@ const Orders = () => {
                 cancelText="HỦY"
             >
                 <Form
-                    name="formEditOrder"
+                    name="form_edit_order"
                     onFinish={onFinishEdit}
                     form={formUpdate}
                     className='form_edit'
@@ -611,110 +848,110 @@ const Orders = () => {
                             />
                         </div>
                         <Form.Item
-                                name="shipping_fee"
-                                label="Phí vận chuyển"
-                                rules={[{ required: true, message: 'Vui lòng nhập phí vận chuyển!' }]}
-                            >
-                                <InputNumber
-                                    min={0}
-                                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                    style={{ width: '100%' }}
-									onChange={handleShippingFeeChange}
-                                />
-                            </Form.Item>
+                            name="shipping_fee"
+                            label="Phí vận chuyển"
+                            rules={[{ required: true, message: 'Vui lòng nhập phí vận chuyển!' }]}
+                        >
+                            <InputNumber
+                                min={0}
+                                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                style={{ width: '100%' }}
+                                onChange={handleShippingFeeChange}
+                            />
+                        </Form.Item>
 
                         <div className="order-summary" style={{ marginTop: '24px' }}>
-                                <Table
-                                    pagination={false}
-                                    showHeader={false}
-                                    dataSource={[
-										{
-											key: '1',
-											label: 'Tạm tính:',
-											value: new Intl.NumberFormat('vi-VN', {
-												style: 'currency',
-												currency: 'VND'
-											}).format(calculateSubTotal(editingOrder?.order_items || []))
-										},
-										{
-											key: '2',
-											label: 'Phí vận chuyển:',
-											value: new Intl.NumberFormat('vi-VN', {
-												style: 'currency',
-												currency: 'VND'
-											}).format(formUpdate.getFieldValue('shipping_fee') || 0)
-										},
-										{
-											key: '3',
-											label: 'Tổng cộng:',
-											value: new Intl.NumberFormat('vi-VN', {
-												style: 'currency',
-												currency: 'VND'
-											}).format(totalAmount || 0)
-										}
-									]}
-                                    columns={[
-                                        {
-                                            dataIndex: 'label',
-                                            key: 'label',
-                                            align: 'right',
-                                            width: '50%',
-                                            render: (text) => <strong>{text}</strong>
-                                        },
-                                        {
-                                            dataIndex: 'value',
-                                            key: 'value',
-                                            width: '50%',
-                                            render: (text) => <strong>{text}</strong>
-                                        }
-                                    ]}
-                                    size="small"
-                                    bordered
-                                    style={{ marginTop: '16px' }}
-                                />
-                            </div>
+                            <Table
+                                pagination={false}
+                                showHeader={false}
+                                dataSource={[
+                                    {
+                                        key: '1',
+                                        label: 'Tạm tính:',
+                                        value: new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        }).format(calculateSubTotal(editingOrder?.order_items || []))
+                                    },
+                                    {
+                                        key: '2',
+                                        label: 'Phí vận chuyển:',
+                                        value: new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        }).format(editingOrder?.shipping_fee || 0)
+                                    },
+                                    {
+                                        key: '3',
+                                        label: 'Tổng cộng:',
+                                        value: new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        }).format(totalAmount || 0)
+                                    }
+                                ]}
+                                columns={[
+                                    {
+                                        dataIndex: 'label',
+                                        key: 'label',
+                                        align: 'right',
+                                        width: '50%',
+                                        render: (text) => <strong>{text}</strong>
+                                    },
+                                    {
+                                        dataIndex: 'value',
+                                        key: 'value',
+                                        width: '50%',
+                                        render: (text) => <strong>{text}</strong>
+                                    }
+                                ]}
+                                size="small"
+                                bordered
+                                style={{ marginTop: '16px' }}
+                            />
+                        </div>
                     </div>
                     <div className="form_edit_items">
                         <h3>Thông tin khách hàng</h3>
                         <div className="form_edit_contents">
-                        <Table
-                            dataSource={[
-                                {
-                                    label: 'Tên khách Hàng',
-                                    value: editingOrder?.customer?.fullName
-                                },
-                                {
-                                    label: 'Email',
-                                    value: editingOrder?.customer?.email
-                                },
-                                {
-                                    label: 'Số điện thoại',
-                                    value: editingOrder?.customer?.phone
-                                },
-                                {
-                                    label: 'Địa chỉ giao hàng',
-                                    value: editingOrder?.shipping_address
-                                }
-                            ]}
-                            pagination={false}
-                            columns={[
-                                {
-                                    title: 'Thông tin',
-                                    dataIndex: 'label',
-                                    key: 'label',
-                                    width: '30%',
-                                    render: (text) => <strong>{text}</strong>
-                                },
-                                {
-                                    title: 'Chi tiết',
-                                    dataIndex: 'value',
-                                    key: 'value',
-                                    width: '70%'
-                                }
-                            ]}
-                            size="small"
-                            bordered
-                        />
+                            <Table
+                                dataSource={[
+                                    {
+                                        label: 'Tên khách Hàng',
+                                        value: editingOrder?.customer?.fullName
+                                    },
+                                    {
+                                        label: 'Email',
+                                        value: editingOrder?.customer?.email
+                                    },
+                                    {
+                                        label: 'Số điện thoại',
+                                        value: editingOrder?.customer?.phone
+                                    },
+                                    {
+                                        label: 'Địa chỉ giao hàng',
+                                        value: editingOrder?.shipping_address
+                                    }
+                                ]}
+                                pagination={false}
+                                columns={[
+                                    {
+                                        title: 'Thông tin',
+                                        dataIndex: 'label',
+                                        key: 'label',
+                                        width: '30%',
+                                        render: (text) => <strong>{text}</strong>
+                                    },
+                                    {
+                                        title: 'Chi tiết',
+                                        dataIndex: 'value',
+                                        key: 'value',
+                                        width: '70%'
+                                    }
+                                ]}
+                                size="small"
+                                bordered
+                            />
                         </div>
                     </div>
                     <div className="form_edit_items">
@@ -768,20 +1005,27 @@ const Orders = () => {
                             </Form.Item>
 
                             <Form.Item
-                                name="tracking_number"
-                                label="Số điện thoại giao hàng"
-                                rules={[
-                                    {
-                                        required: [3, 4].includes(formUpdate.getFieldValue('status')),
-                                        message: 'Vui lòng nhập số điện thoại giao hàng!'
-                                    },
-                                    {
-                                        pattern: /^[0-9]{10}$/,
-                                        message: 'Số điện thoại không hợp lệ!'
-                                    }
-                                ]}
+                                dependencies={['status']}
+                                noStyle
                             >
-                                <Input />
+                                {({ getFieldValue }) => (
+                                    <Form.Item
+                                        name="tracking_number"
+                                        label="Số điện thoại giao hàng"
+                                        rules={[
+                                            {
+                                                required: [3, 4].includes(getFieldValue('status')),
+                                                message: 'Vui lòng nhập số điện thoại giao hàng!'
+                                            },
+                                            {
+                                                pattern: /^[0-9]{10}$/,
+                                                message: 'Số điện thoại không hợp lệ!'
+                                            }
+                                        ]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                )}
                             </Form.Item>
 
                             <Form.Item name="note" label="Ghi chú">
@@ -789,19 +1033,26 @@ const Orders = () => {
                             </Form.Item>
 
                             <Form.Item
-                                name="cancelled_reason"
-                                label="Lý do hủy đơn"
-                                rules={[
-                                    {
-                                        required: formUpdate.getFieldValue('status') === 5,
-                                        message: 'Vui lòng nhập lý do hủy đơn!'
-                                    }
-                                ]}
+                                dependencies={['status']}
+                                noStyle
                             >
-                                <Input disabled={formUpdate.getFieldValue('status') !== 5} />
+                                {({ getFieldValue }) => (
+                                    <Form.Item
+                                        name="cancelled_reason"
+                                        label="Lý do hủy đơn"
+                                        rules={[
+                                            {
+                                                required: getFieldValue('status') === 5,
+                                                message: 'Vui lòng nhập lý do hủy đơn!'
+                                            }
+                                        ]}
+                                    >
+                                        <Input disabled={getFieldValue('status') !== 5} />
+                                    </Form.Item>
+                                )}
                             </Form.Item>
                         </div>
-                    </div>            
+                    </div>
                 </Form>
             </Modal>
         </>

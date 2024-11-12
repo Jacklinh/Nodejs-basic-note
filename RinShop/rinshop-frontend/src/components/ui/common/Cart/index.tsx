@@ -28,9 +28,9 @@ const Cart = () => {
         <>
             <Button type="primary" onClick={showModal} className='product_cart'>
                 <span className='cart_number'><FaCartPlus />{totalNumber} sản phẩm</span>
-                <span className='cart_price'>{totalAmount.toLocaleString('vi-VN')} VNĐ</span>
+                <span className='cart_price'>{new Intl.NumberFormat('vi-VN',{style: 'currency',currency: 'VND'}).format(totalAmount)}</span>
             </Button>
-            <Drawer title="SẢN PHẨM ĐƠN HÀNG" open={isModalOpen} onClose={handleCancel}>
+            <Drawer title="GIỎ HÀNG" open={isModalOpen} onClose={handleCancel}>
                 <div className="box_modal_cart">
                     <p className="cart_heading"><FaCartPlus />{totalNumber} sản phẩm</p>
                     {!products.length ? (
@@ -60,7 +60,7 @@ const Cart = () => {
                                                         </>
                                                     ): 
                                                     (
-                                                        <span className='price_new'>{p.price.toLocaleString('vi-VN')} VNĐ</span>
+                                                        <span className='price_new'>{new Intl.NumberFormat('vi-VN',{style: 'currency',currency: 'VND'}).format(p.price)}</span>
                                                     )
                                                 }
                                             </p>
@@ -83,11 +83,12 @@ const Cart = () => {
                                     </li>
                                 ))}
                             </ul>
+                            <p className="cart_checkout">
+                                <Link href='/checkout' onClick={handleCancel}>Thanh toán <span className='cart_price'>{new Intl.NumberFormat('vi-VN',{style: 'currency',currency: 'VND'}).format(totalAmount)}</span></Link>
+                            </p>
                         </div>
                     )}
-                    <p className="cart_checkout">
-                        <Link href='/checkout' onClick={handleCancel}>Thanh toán <span className='cart_price'>{totalAmount.toLocaleString('vi-VN')} VNĐ</span></Link>
-                    </p>
+                    
                 </div>
             </Drawer>
         </>

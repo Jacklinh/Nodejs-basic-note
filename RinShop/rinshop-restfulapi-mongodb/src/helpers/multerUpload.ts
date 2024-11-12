@@ -42,7 +42,7 @@ const uploadImage = multer({
 const uploadImages = multer({ 
     storage: storageImage,
     fileFilter: imageFilter
-}).array('files')
+}).array('files', 10)   
 export {
     uploadImage,
     uploadImages,

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, response } from "express";
 import productsService from "../services/products.service";
 import { sendJsonSuccess } from "../helpers/responseHandler";
-import {uploadImage} from "../helpers/multerUpload"
+import {uploadImage, uploadImages} from "../helpers/multerUpload"
 import multer from "multer";
 const findAll = async(req: Request, res: Response, next: NextFunction) => {
     try {
@@ -82,19 +82,47 @@ const createDocument = async (req: Request, res: Response, next: NextFunction)=>
           })
         }
         else{
-        //Nếu upload hình thành công thì mới tạo sản phẩm
-        const product = await productsService.createDocument({
-            ...req.body,
-            thumbnail: `uploads/${req.file?.filename}`, //cập nhật lại link sản phẩm
-        })
-        sendJsonSuccess(res)(product)
+            //Nếu upload hình thành công thì mới tạo sản phẩm
+            const thumbnailPath = req.file ? `uploads/${req.file.filename}` : '';
+            if(req.body.gallery){
+                 uploadImages(req, res, async function (error) {
+                        if (error instanceof multer.MulterError) {
+                            return res.status(500).json({
+                                statusCode: 500,
+                                message: error.message,
+                                typeError: 'MulterError'
+                            });
+                        }else if (error) {
+                            return res.status(500).json({
+                                statusCode: 500,
+                                message: error.message,
+                                typeError: 'UnKnownError'
+                            });
+                        }else {
+                            const galleryPaths = req.files && Array.isArray(req.files) 
+                            ? req.files.map((file: Express.Multer.File) => `uploads/${file.filename}`)
+                            : '';
+                            const product = await productsService.createDocument({
+                                ...req.body,
+                                gallery: galleryPaths,
+                                thumbnail: thumbnailPath, //cập nhật lại link sản phẩm
+                            })
+                            sendJsonSuccess(res)(product)
+                        }
+                    });
+            }else {
+                const product = await productsService.createDocument({
+                    ...req.body,
+                    thumbnail: thumbnailPath, //cập nhật lại link sản phẩm
+                })
+                sendJsonSuccess(res)(product)
+            }
         }
       })
     } catch (error) {
       next(error)
     }
 }
-
 const updateByID = async(req: Request, res: Response, next: NextFunction) => {
     try {
         const {id} = req.params;

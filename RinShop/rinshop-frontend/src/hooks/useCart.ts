@@ -14,7 +14,8 @@ interface TCart {
   totalAmount: number,
   calculateTotalAmount: () => void,
   clearCart: () => void,
-  shippingFee: number | 0
+  shippingFee: number | 0,
+  setShippingFee: (fee: number) => void
 }
 export const useCart = create(
     persist<TCart>(
@@ -83,6 +84,9 @@ export const useCart = create(
              get().calculateTotalAmount();
           },
           // phí vận chuyển(nếu có)
+          setShippingFee: (fee: number) => {
+            set({ shippingFee: fee });
+          },
           shippingFee: 0
         }),
         {

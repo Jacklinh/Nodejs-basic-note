@@ -10,35 +10,43 @@ const findAll = async(query: any) => {
     const page = page_str ? parseInt(page_str) : 1;
     const limit = limit_str ? parseInt(limit_str) : 5;
     const offset = (page - 1) * limit;
-    // filter theo tung dieu kien
-    let objectFilter: any = {};
-    // search theo ten san pham
-    if(query.keyword && query.keyword !== '') {
-        objectFilter = {... objectFilter, product_name: new RegExp(query.keyword, "i")}
-    }
-    // loc theo ten danh muc
-    if(query.category && query.category !== '') {
-        objectFilter = {...objectFilter, category: query.category}
-    }
     /* Sắp xếp */
     let objSort: any = {};
     const sortBy = query.sort || 'updateAt'; // Mặc định sắp xếp theo ngày tạo giảm dần
     const orderBy = query.order && query.order == 'ASC' ? 1: -1 ; // sắp xếp theo giá (mặc định theo giá giảm dần)
     objSort = {...objSort, [sortBy]: orderBy} // Thêm phần tử sắp xếp động vào object {}
+    // filter theo tung dieu kien
+    let objectFilter: any = {};
+    // search theo ten san pham
+    if(query.keyword && query.keyword !== '') {
+        const regex = new RegExp(query.keyword, 'i');
+        objectFilter = {
+            ...objectFilter,
+            $or: [
+                { product_name: { $regex: regex } }
+            ]
+        };
+    }
+    // filter theo khoảng giá
+    if(query.price_min || query.price_max) {
+        objectFilter.price = {};
+        if(query.price_min) {
+            objectFilter.price.$gte = parseInt(query.price_min);
+        }
+        if(query.price_max) {
+            objectFilter.price.$lte = parseInt(query.price_max);
+        }
+    }
+    
 
-    const totalRecords = await Product.countDocuments({
-        ...objectFilter
-    });
+    const totalRecords = await Product.countDocuments(objectFilter);
     const products = await Product
-    .find({
-        ...objectFilter
-    })
+    .find(objectFilter)
     .sort(objSort)
     .select('-__v')
     .populate({
         path: 'category',
         select: '-__v -createdAt -updatedAt',
-        match: objectFilter
     })
     .skip(offset)
     .limit(limit);
@@ -214,6 +222,7 @@ const createDocument = async(body: any) => {
         origin: body.model_year, 
         slug: body.slug,
         thumbnail: body.thumbnail, 
+        gallery: body.gallery,
         stock: body.stock, 
         isBest: body.isBest, 
         isNewProduct: body.isNewProduct, 

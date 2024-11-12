@@ -120,28 +120,27 @@ const orderSchema = new Schema<TypeOrder>({
 orderSchema.pre('save', async function(next) {
     try {
         if (this.isNew && !this.order_code) {
-            // Lấy số thứ tự đơn hàng mới nhất
+            // Lấy đơn hàng cuối cùng
             const lastOrder = await Order.findOne({}, {}, { sort: { 'createdAt': -1 } });
             let orderNumber = 1;
 
             if (lastOrder && lastOrder.order_code) {
-                // Lấy số từ mã đơn hàng cuối cùng
-                const lastNumber = parseInt(lastOrder.order_code.replace('ORD', ''));
+                // Lấy số từ mã đơn hàng cuối cùng (6 ký tự cuối)
+                const lastNumber = parseInt(lastOrder.order_code.slice(-6));
                 if (!isNaN(lastNumber)) {
-                    orderNumber = lastNumber + 1;
+                    orderNumber = (lastNumber + 1) % 1000000; // Giới hạn 6 chữ số
                 }
             }
 
-            // Tạo mã đơn hàng mới
-            const timestamp = new Date().getTime().toString().slice(-6);
-            this.order_code = `ORD${timestamp}${String(orderNumber).padStart(4, '0')}`;
+            // Format số thành chuỗi 6 chữ số
+            this.order_code = String(orderNumber).padStart(6, '0');
 
-            // Kiểm tra xem mã đã tồn tại chưa
+            // Kiểm tra trùng lặp
             const existingOrder = await Order.findOne({ order_code: this.order_code });
             if (existingOrder) {
-                // Nếu đã tồn tại, thêm một số ngẫu nhiên
-                const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-                this.order_code = `ORD${timestamp}${random}`;
+                // Nếu trùng, tạo số ngẫu nhiên 6 chữ số
+                const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+                this.order_code = random;
             }
         }
         next();

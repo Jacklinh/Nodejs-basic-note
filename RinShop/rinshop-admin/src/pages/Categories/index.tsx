@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {Table,Pagination,Input,Button,Space,message, Popconfirm, Modal, Form,Select, Image, Upload } from 'antd'
+import {Table,Pagination,Input,Button,Space,message, Popconfirm, Modal, Form, Image, Upload } from 'antd'
 import type { TableProps, FormProps, UploadProps, UploadFile, GetProp} from 'antd'
 import { UploadOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
@@ -7,10 +7,12 @@ import { globalSetting } from '../../constants/configs';
 import { axiosClient } from '../../library/axiosClient';
 import { useNavigate,useSearchParams  } from 'react-router-dom';
 import { AiOutlinePlus,AiOutlineEdit,AiOutlineDelete } from "react-icons/ai";
-import { TypeCategory } from '../../types/type';
-const { TextArea } = Input;
+import { TypeCategory,EnumRole } from '../../types/type';
+import useAuth from '../../hooks/useAuth';
 import noImage from '../../assets/noImage.jpg'
+const { TextArea } = Input;
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
 const Categories = () => {
     // khai báo type
     interface categoryDataType {
@@ -28,21 +30,21 @@ const Categories = () => {
     const page_str = params.get('page');
     const page = page_str ? parseInt(page_str) : 1;
     
-    // filter category name
-    const categoryName_str = params.get('categoryName');
-    const categoryName = categoryName_str  ? categoryName_str : '';
+    // search keyword
+	const keyword_str = params.get('keyword');
+	const keyword = keyword_str ? keyword_str : null;
     //============== get all category ============= //
     const fetchCategory = async() => {
         let url= `${globalSetting.URL_API}/categories?`;
-        if(categoryName !== '') {
-            url += `categoryName=${categoryName}&`;
-        }
+        if (keyword) {
+			url += `keyword=${keyword}&`;
+		}
         url += `page=${page}&limit=${limit}`;
         const res = await axiosClient.get(url);
         return res.data.data;
     }
     const getCategory = useQuery({
-        queryKey: ['categories',page,categoryName],
+        queryKey: ['categories',page,keyword],
         queryFn: fetchCategory
     })
     //============== delete find id ============= //
@@ -196,24 +198,34 @@ const Categories = () => {
         },
     };
     //============== end edit upload image ============= //
-    //============== filter categry name  ============= //
-    const fetchFilterCategory = async () => {
-        const url= `${globalSetting.URL_API}/categories`;
-        const res = await axiosClient.get(url);
-        return res.data.data;
-    }
-    const filterCategory = useQuery({
-        queryFn: fetchFilterCategory,
-        queryKey: ['categories-tree']
-    })
-    const onChangeFilter = (value: string) => {
-        if(value !== '') {
-            navigate(`/categories?categoryName=${value}`)
-        }else {
-            navigate(`/categories`)
-        }
-    };
-    
+    //============== search category ============= //
+	const [formSearch] = Form.useForm();
+	const [clientReadySearch, setClientReadySearch] = useState(false);
+	const onFinishSearch: FormProps<TypeCategory>['onFinish'] = (values) => {
+		// cập nhập lại url
+		const params = new URLSearchParams();
+		// duyệt qua từng cặp key -value trong object
+		for (const [key, value] of Object.entries(values)) {
+			if (value !== undefined && value !== '') {
+				params.append(key, String(value));
+			}
+		}
+		const searchString = params.toString();
+		navigate(`/categories?${searchString}`);
+	}
+	const onFinishFailedSearch: FormProps<TypeCategory>['onFinishFailed'] = (errorInfo) => {
+		console.log('Failed:', errorInfo);
+	}
+	const handleInputChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		setClientReadySearch(value.length > 0); // Hiện nút khi có giá trị
+		// Điều hướng đến /categories nếu input rỗng
+		if (value.length === 0) {
+			navigate(`/categories`);
+		}
+	};
+    // phân quyền, lấy user từ hook useAuth
+	const { user } = useAuth();
     // khai bao columns
     const categoryColumns: TableProps<categoryDataType>["columns"] = [
         {
@@ -255,13 +267,15 @@ const Categories = () => {
                 )
                 
             },
-        },
-        {
-            title: 'Hành động',
-            key: 'action',
-            render: (_,record) => (
-                <Space size="middle">
-                    <Button 
+        }
+    ]
+    if (user?.role.includes(EnumRole.ADMIN) || user?.role.includes(EnumRole.USER)) {
+		categoryColumns.push({
+			title: 'Hành Động',
+			key: 'action',
+			render: (_, record) => (
+				<Space size="middle">
+					<Button 
                     type="primary" 
                     shape="circle" 
                     className='common_button'
@@ -271,7 +285,9 @@ const Categories = () => {
                         formUpdate.setFieldsValue(record)
                       }}
                     ></Button>
-                    <Popconfirm
+					{/* admin có quyền xoá */}
+					{user?.role.includes(EnumRole.ADMIN) && (
+						<Popconfirm
                         title="Xoá danh mục sản phẩm"
                         description="Bạn có muốn xoá danh mục sản phẩm này phải không?"
                         onConfirm={()=> {
@@ -289,33 +305,62 @@ const Categories = () => {
                         >
                         </Button>
                     </Popconfirm>
-                </Space>
-            )
-        }
-    ]
+					)}
+				</Space>
+			),
+		})
+	}
+	// Render nút Add Staff theo role
+	const renderAddButton = () => {
+		if (user?.role.includes(EnumRole.ADMIN) || user?.role.includes(EnumRole.USER)) {
+			return (
+				<Button type="primary" icon={<AiOutlinePlus />} onClick={()=>{showModalAdd()}} className='common_button btn_add'>Thêm danh mục</Button>
+			);
+		}
+		return null;
+	};
     return (
         <>
             <div className="box_heading">
                 <h2>DANH MỤC SẢN PHẨM</h2>
-                <Select
-                    showSearch
-                    placeholder="Lọc theo danh mục sản phẩm"
-                    optionFilterProp="label"
-                    onChange={onChangeFilter}
-                    options={[
-                    {
-                        value: '',
-                        label: 'Tất cả',
-                    },
-                    ...(filterCategory?.data
-                        ? filterCategory.data.categories_list.map((c:categoryDataType) => ({
-                            value: c.category_name,
-                            label: c.category_name,
-                          }))
-                        : []),
-                    ]}
-                />
-                <Button type="primary" icon={<AiOutlinePlus />} onClick={()=>{showModalAdd()}} className='common_button btn_add'>Thêm danh mục</Button>
+                <Form
+					form={formSearch}
+					name="category_search_form"
+					onFinish={onFinishSearch}
+					onFinishFailed={onFinishFailedSearch}
+					autoComplete="on"
+					layout="inline"
+					className='form_search'
+				>
+					<Form.Item
+						label=""
+						name="keyword"
+					>
+						<Input onChange={handleInputChangeSearch} placeholder="Tìm kiếm theo tên danh mục" />
+					</Form.Item>
+					<Form.Item shouldUpdate labelCol={{ offset: 2 }}>
+						<Space>
+							<Button type="primary" htmlType="submit"
+								disabled={
+									!clientReadySearch ||
+									!formSearch.isFieldsTouched(true) ||
+									!formSearch.getFieldValue('keyword')
+								}
+							>
+								Tìm kiếm
+							</Button>
+							<Button type="default" htmlType="reset"
+								onClick={() => {
+									formSearch.resetFields();
+									navigate(`/categories`)
+								}}
+							>
+								Reset
+							</Button>
+						</Space>
+					</Form.Item>
+				</Form>
+                {renderAddButton()}
             </div>
             <div className="data_table">
                 <Table

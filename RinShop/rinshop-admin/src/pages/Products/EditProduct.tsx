@@ -6,7 +6,7 @@ import { useNavigate,useParams} from 'react-router-dom';
 import {Form,InputNumber,Input,Switch,message,Button, Select,Upload} from 'antd';
 import { CheckOutlined, CloseOutlined,UploadOutlined } from '@ant-design/icons';
 import type { FormProps,UploadProps} from 'antd';
-import { TypeProduct, TypeCategory } from '../../types/type';
+import { TypeProduct, TypeCategory, ProductUnit } from '../../types/type';
 
 // ckeditor
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -68,7 +68,7 @@ const EditProduct = () => {
     
     const editorConfig: EditorConfig = {
         simpleUpload: {
-            uploadUrl: '',
+            uploadUrl: `${globalSetting.URL_API}/upload/photos`,
         },
             toolbar: {
                 items: [
@@ -273,6 +273,43 @@ const EditProduct = () => {
           formUpdate.setFieldValue('thumbnail', null); // Clear giá trị khỏi input thumbnail
           // Gọi API xóa hình ảnh trên server (cần thêm API thực hiện việc này)
         },
+    };
+    const [galleryList, setGalleryList] = useState<any[]>([]);
+    const propsUploadEditMultiple: UploadProps = {
+        name: 'files',
+        action: `${globalSetting.URL_API}/upload/photos`,
+        listType: 'picture',
+        multiple: true,
+        maxCount: 10,
+        onChange: (info) => {
+            setGalleryList(info.fileList);
+            if (info.file.status === 'done') {
+                // Lấy danh sách link ảnh đã upload
+                const uploadedLinks = info.fileList
+                    .filter(file => file.status === 'done')
+                    .map(file => file.response?.data?.link)
+                    .filter(Boolean);
+
+                // Cập nhật giá trị vào form
+                formUpdate.setFieldValue('gallery', uploadedLinks);
+            } else if (info.file.status === 'error') {
+                message.error(`${info.file.name} upload thất bại.`);
+            }
+        },
+        onRemove: (file) => {
+            //Xóa file khỏi danh sách
+            const newFileList = galleryList.filter(item => item.uid !== file.uid);
+            setGalleryList(newFileList);
+            
+            // Cập nhật lại giá trị form
+            const remainingLinks = newFileList
+                .filter(file => file.status === 'done')
+                .map(file => file.response?.data?.link)
+                .filter(Boolean);
+            
+            formUpdate.setFieldValue('gallery', remainingLinks);
+        },
+        fileList: galleryList,
       };
     //============== end edit upload image ============= //
     const updateMutationCategory = useMutation({
@@ -338,14 +375,22 @@ const EditProduct = () => {
                         </Form.Item>
                     </div>
                 </div>
-                {/* <div className="form_edit_item">
+                <div className="form_edit_item">
                     <div className="form_edit_ttl">
                         <h3>Hình ảnh khác(nếu có)</h3>
                     </div>
                     <div className="form_edit_content">
-                        <p>Upload Gallery</p>
+                        {/* <Form.Item<TypeProduct>
+                            label="thư viện hình ảnh"
+                            name="gallery"
+                            valuePropName="gallery"
+                        >
+                        <Upload {...propsUploadEditMultiple} >
+                        <Button icon={<UploadOutlined />}>Tải hình ảnh</Button>
+                        </Upload>
+                        </Form.Item> */}
                     </div>
-                </div> */}
+                </div>
                 <div className="form_edit_item">
                     <div className="form_edit_ttl">
                         <h3>Thông tin sản phẩm</h3>
@@ -398,7 +443,18 @@ const EditProduct = () => {
                             <Input 
                             />
                         </Form.Item>
-                        
+                        <Form.Item
+                        label="Đơn vị tính"
+                        name="unit"
+                    >
+                        <Select style={{ width: '100%' }}>
+                            {Object.values(ProductUnit).map((unit) => (
+                                <Select.Option key={unit} value={unit}>
+                                    {unit}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
                     </div>
                 </div>
                 <div className="form_edit_item">

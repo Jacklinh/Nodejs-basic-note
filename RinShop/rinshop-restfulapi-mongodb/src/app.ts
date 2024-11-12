@@ -10,6 +10,7 @@ import productsRoute from './routes/v1/products.route';
 import uploadRouter from './routes/v1/upload.route';
 import customersRoute from './routes/v1/customers.route';
 import ordersRoute from './routes/v1/orders.route';
+import dashboardRoute from './routes/v1/dashboard.route';
 import cors from 'cors'
 // upload image
 const app: Express = express();
@@ -29,6 +30,7 @@ app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/upload', uploadRouter)
 app.use('/api/v1/customers', customersRoute)
 app.use('/api/v1/orders', ordersRoute)
+app.use('/api/v1/dashboard', dashboardRoute)
 // errors 404, not found
 app.use((rep: Request, res: Response, next: NextFunction) => {
     next(createError(404))
