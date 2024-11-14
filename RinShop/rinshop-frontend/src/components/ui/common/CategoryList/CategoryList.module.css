@@ -18,7 +18,7 @@
 	background-color: var(--body-background);
 	color: var(--color_black);
 	border-radius: 5px;
-	padding: 20px 10px;
+	padding: 10px;
 	gap: 10px 0;
 	z-index: 0;
 	transition: all .3s ease-in-out;
@@ -52,4 +52,5 @@
 .category_box span {
 	font-size: 1.15rem;
 	font-weight: bold;
+	text-align: center;
 }

@@ -406,49 +406,66 @@ const Orders = () => {
             }
         }
     ];
-    if (user?.role.includes(EnumRole.ADMIN) || user?.role.includes(EnumRole.USER) || user?.role.includes(EnumRole.VIEWER)) {
+    const canViewOrder = user?.role.includes(EnumRole.ADMIN) || 
+                        user?.role.includes(EnumRole.USER) || 
+                        user?.role.includes(EnumRole.VIEWER);
+
+    const canEditOrder = user?.role.includes(EnumRole.ADMIN) || 
+                        user?.role.includes(EnumRole.USER);
+
+    const canDeleteOrder = user?.role.includes(EnumRole.ADMIN);
+    if (canViewOrder) {
         columns.push({
             title: 'Hành Động',
             key: 'action',
             fixed: "right",
             width: 200,
-            render: (_, record) => (
-                <Space size="middle">
-                    <Button
-                        type="primary"
-                        shape="circle"
-                        className='common_button'
-                        icon={<FaRegEye />}
-                        onClick={() => showModalDetail(record)}
-                    />
-                    {user?.role.includes(EnumRole.USER) && (
+            render: (_, record) => {
+                // Kiểm tra trạng thái đơn hàng để hiển thị nút sửa
+                const canEdit = canEditOrder && record.status !== 4 && record.status !== 5; // Không cho sửa đơn đã giao hoặc đã hủy
+                
+                return (
+                    <Space size="middle">
+                        {/* Nút xem chi tiết - tất cả role có quyền xem đều thấy */}
                         <Button
                             type="primary"
                             shape="circle"
                             className='common_button'
-                            icon={<AiOutlineEdit />}
-                            onClick={() => showModalEdit(record)}
+                            icon={<FaRegEye />}
+                            onClick={() => showModalDetail(record)}
                         />
-                    )}
-                    {/* admin có quyền xoá */}
-                    {user?.role.includes(EnumRole.ADMIN) && (
-                        <Popconfirm
-                            title="Xoá đơn hàng"
-                            description="Bạn có chắc chắn muốn xoá đơn hàng này?"
-                            onConfirm={() => deleteOrder.mutate(record._id)}
-                            okText="Đồng ý"
-                            cancelText="Hủy"
-                        >
+    
+                        {/* Nút sửa - chỉ hiện khi có quyền sửa và đơn hàng có thể sửa */}
+                        {canEdit && (
                             <Button
                                 type="primary"
                                 shape="circle"
-                                icon={<AiOutlineDelete />}
-                                danger
+                                className='common_button'
+                                icon={<AiOutlineEdit />}
+                                onClick={() => showModalEdit(record)}
                             />
-                        </Popconfirm>
-                    )}
-                </Space>
-            ),
+                        )}
+    
+                        {/* Nút xóa - chỉ ADMIN mới thấy */}
+                        {canDeleteOrder && (
+                            <Popconfirm
+                                title="Xoá đơn hàng"
+                                description="Bạn có chắc chắn muốn xoá đơn hàng này?"
+                                onConfirm={() => deleteOrder.mutate(record._id)}
+                                okText="Đồng ý"
+                                cancelText="Hủy"
+                            >
+                                <Button
+                                    type="primary"
+                                    shape="circle"
+                                    icon={<AiOutlineDelete />}
+                                    danger
+                                />
+                            </Popconfirm>
+                        )}
+                    </Space>
+                );
+            },
         })
     }
     return (
@@ -1014,7 +1031,7 @@ const Orders = () => {
                                         label="Số điện thoại giao hàng"
                                         rules={[
                                             {
-                                                required: [3, 4].includes(getFieldValue('status')),
+                                                required: [3].includes(getFieldValue('status')),
                                                 message: 'Vui lòng nhập số điện thoại giao hàng!'
                                             },
                                             {

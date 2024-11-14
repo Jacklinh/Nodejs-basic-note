@@ -167,3 +167,40 @@ p {
     font-weight: bold;
     margin-right: 10px;
 }
+/* dashboard_page */
+.dashboard_list {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 20px;
+}
+.dashboard_col {
+    width: calc((100% - 60px) / 4);
+}
+.dashboard_item {
+    background-color: var(--bg-white);
+    border-radius: 10px;
+    padding: 20px 40px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+.dashboard_icon {
+    font-size: 2rem;
+    color: var(--main-color);
+}
+.dashboard_info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.dashboard_title {
+    font-weight: 500;
+    color: var(--body-color);
+}
+.dashboard_value {
+    color: var(--main-color);
+    font-weight: bold;
+    font-size: 1.1rem;
+}

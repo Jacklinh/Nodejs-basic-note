@@ -15,7 +15,7 @@ interface TCart {
   calculateTotalAmount: () => void,
   clearCart: () => void,
   shippingFee: number | 0,
-  setShippingFee: (fee: number) => void
+  setShippingFee: (fee: number) => void,
 }
 export const useCart = create(
     persist<TCart>(
@@ -42,6 +42,7 @@ export const useCart = create(
             // kiểm tra sản phẩm đang thêm có tồn tại hay chưa
             const existingProduct = products.find((product) => product._id === item._id);
             if(existingProduct) {
+              
               // nếu sản phẩm đã có trong giỏ hàng, tăng số lượng lên 1
               const updateProducts = products.map((product) => product._id === item._id ? {...product, quantity: product.quantity + 1} : product);
               set({products: updateProducts})
@@ -61,7 +62,12 @@ export const useCart = create(
           },
           // tăng số lượng sản phẩm
           increase: (id: string | undefined) => {
-            const updateProducts = get().products.map((product) => product._id === id ? {...product, quantity: product.quantity + 1} : product);
+            const updateProducts = get().products.map((product) => {
+              if (product._id === id) {
+                return {...product, quantity: product.quantity + 1};
+              }
+              return product;
+            });
             set({products : updateProducts})
             // cập nhật lại totalAmount
             get().calculateTotalAmount();

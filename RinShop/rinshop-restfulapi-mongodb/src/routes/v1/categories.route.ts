@@ -3,6 +3,8 @@ import categoriesController from "../../controllers/categories.controller";
 import { authorizationAccess,authenticateToken } from '../../middlewares/auth.middleware';
 import { EnumRole } from '../../types/models';
 const router = express.Router();
+// router cho client
+router.get('/client',categoriesController.findAll)
 // Định nghĩa các role được phép truy cập
 const ROLES = {
     VIEW: [EnumRole.ADMIN, EnumRole.USER, EnumRole.VIEWER],

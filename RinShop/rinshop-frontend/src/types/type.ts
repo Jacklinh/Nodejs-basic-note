@@ -20,6 +20,7 @@ export type TypeProduct = {
     isBest: boolean, /* SP bán nổi bật */
     isNewProduct: boolean, /* SP mới về */
     isShowHome: boolean, // sản phẩm có hiển thị trên trang chủ không.
+    unit?: string, // đơn vị tính
 }
 export type TProductCate = {
     products_list: TypeProduct[],
@@ -37,6 +38,7 @@ export type TProductCart = {
     discount?: number | undefined,
     thumbnail?: string,
     quantity: number | 1,
+    stock?: number | 0    
 }
 
 export type TCustomer = {

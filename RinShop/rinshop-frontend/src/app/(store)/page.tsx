@@ -1,17 +1,14 @@
 import { Suspense } from 'react';
 import CategoryList from "@/components/ui/common/CategoryList";
-import ProductHomeByCate from "@/components/ui/common/ProductHomeByCate";
-import LoadingSpinner from "@/components/ui/common/Loading";
 import Cart from '@/components/ui/common/Cart';
+import CategoryListLoading from '@/components/ui/common/CategoryList/CategoryListLoading';
 export default function Home() {
     return (
         <>
-            <Suspense fallback={<LoadingSpinner />}>
+            <Suspense fallback={<CategoryListLoading />}>
                 <CategoryList />
-                <ProductHomeByCate />
                 <Cart />
             </Suspense>
-            
         </>
     );
 }

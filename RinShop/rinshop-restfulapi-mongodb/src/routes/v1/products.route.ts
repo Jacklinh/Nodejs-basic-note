@@ -3,18 +3,17 @@ import productsController from "../../controllers/products.controller";
 import { authorizationAccess,authenticateToken } from '../../middlewares/auth.middleware';
 import { EnumRole } from '../../types/models';
 const router = express.Router();
+// router public client
+// get all products & product category
+router.get('/client',productsController.findAllClient)
+// product detail and related product
+router.get('/client/detail/:slug',productsController.findOneBySlug)
 // Định nghĩa các role được phép truy cập
 const ROLES = {
     VIEW: [EnumRole.ADMIN, EnumRole.USER, EnumRole.VIEWER],
     MODIFY: [EnumRole.ADMIN, EnumRole.USER],
     ADMIN: [EnumRole.ADMIN]
 };
-// route public
-router.get('/slug/:slug',productsController.findAllByCate)
-//router product and related product 
-router.get('/details/:slug',productsController.findOneBySlug)
-//GET localhost:8000/api/v1/products/isbest
-router.get('/isbest',productsController.findByIsBest)
 // check token để các route là private
 // router.use(authenticateToken)
 // 1 get all products

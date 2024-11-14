@@ -13,10 +13,13 @@
     color: #333;
     line-height: 28px
 }
-
-.article-content h3, .article-content h2 {
-    font-size: 18px;
-    line-height: 30px;
+.article-content h2 {
+    color: green;
+    font-size: 26px;
+}
+.article-content h3 {
+    font-size: 22px;
+    color: aquamarine;
     font-weight: bold;
 }
 
@@ -27,11 +30,6 @@
     max-width: 100%;
     margin: 0 auto
 }
-
-.article-content a, .article-content a:hover, .article-content a:active {color: #288ad6}
-.article-content h3, .article-content h3 a {color:#1d71ab}
-.article-content h2, .article-content h2 a {color:#1d71ab}
-.article-content h4, .article-content h4 a{color:#1d71ab}
 
 .article-content ul,
 .article-content ol {

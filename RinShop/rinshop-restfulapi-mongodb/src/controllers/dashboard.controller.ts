@@ -11,6 +11,24 @@ const getStatistics = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
+const getRecentOrders = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const recentOrders = await dashboardService.getRecentOrders(req.query);
+        sendJsonSuccess(res, "success")(recentOrders);
+    }catch(error) {
+        next(error);
+    }
+}
+const getInventory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const inventory = await dashboardService.getInventory();
+        sendJsonSuccess(res, "success")(inventory);
+    }catch(error) {
+        next(error);
+    }
+}
 export default {
-    getStatistics
+    getStatistics,
+    getRecentOrders,
+    getInventory
 }
